@@ -6,6 +6,12 @@
 <title>cliy0-2 Portfolio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Security engineer: detection engineering, SOC, reverse engineering, systems and full-stack development.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="cliy0-2 · Detection & SOC engineer">
+<meta property="og:description" content="Detection engineering, threat hunting and reverse engineering, plus the systems and code around them. Open to on-site and hybrid roles.">
+<meta property="og:url" content="https://cliy0-2.github.io/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2311201f'/%3E%3Ctext x='16' y='21.5' font-family='Arial,sans-serif' font-weight='700' font-size='14' fill='%2356d4c1' text-anchor='middle'%3Ec2%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@600;800&display=swap">
@@ -13,8 +19,9 @@
 [hidden]{display:none!important}
 body{margin:0}
 img{max-width:100%}
-/* Layout: one editorial column (max 1080px) under a sticky role switch; the hero pairs a
-   statement with a telemetry panel, and every section below re-orders itself by role. */
+/* Layout: one editorial column (max 1080px) under a sticky bar holding the role and language
+   switches; the hero pairs a statement with a telemetry panel, and every section below
+   re-orders itself by role. */
 :root {
   --bg: #f2f5f5;
   --surface: #ffffff;
@@ -26,6 +33,7 @@ img{max-width:100%}
   --flag: #b0451c;
   --flag-soft: rgba(176, 69, 28, .10);
   --heat-0: #e1e8e7;
+  --code-bg: #f6f8f8;
   --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -41,13 +49,13 @@ img{max-width:100%}
   :root:not([data-theme="light"]) {
     --bg: #0e1316; --surface: #151c20; --ink: #e2ebe9; --muted: #8ea19e; --line: #25312f;
     --accent: #56d4c1; --accent-soft: rgba(86, 212, 193, .13); --flag: #ff8b5e; --flag-soft: rgba(255, 139, 94, .13);
-    --heat-0: #1d2629; color-scheme: dark;
+    --heat-0: #1d2629; --code-bg: #10171a; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0e1316; --surface: #151c20; --ink: #e2ebe9; --muted: #8ea19e; --line: #25312f;
   --accent: #56d4c1; --accent-soft: rgba(86, 212, 193, .13); --flag: #ff8b5e; --flag-soft: rgba(255, 139, 94, .13);
-  --heat-0: #1d2629; color-scheme: dark;
+  --heat-0: #1d2629; --code-bg: #10171a; color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -61,7 +69,7 @@ body::before {
   z-index: 10; background: var(--bg);
 }
 a { color: var(--accent); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 .wrap {
   max-width: 1080px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -84,13 +92,13 @@ p { margin: 0; }
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; padding-block: 12px; flex-wrap: wrap; }
 .handle { font-family: var(--font-mono); font-weight: 500; font-size: var(--step-0); color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 10px; }
 .mark {
   width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center;
   background: var(--ink); color: var(--bg); font-family: var(--font-display); font-weight: 800; font-size: .8rem;
 }
-.switch { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .switch-label { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
 .seg button {
@@ -99,6 +107,7 @@ p { margin: 0; }
 }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg.lang button { font-family: var(--font-mono); padding: 8px 10px; }
 
 /* Hero */
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; padding-block: 64px 56px; align-items: center; }
@@ -112,45 +121,59 @@ p { margin: 0; }
 .hero h1 { font-size: var(--step-4); font-weight: 800; letter-spacing: -.035em; line-height: 1.02; }
 .hero h1 em { font-style: normal; color: var(--accent); }
 .role-title { font-family: var(--font-mono); font-size: var(--step-0); color: var(--ink); }
-.lede { font-size: var(--step-1); color: var(--muted); max-width: 34ch; line-height: 1.5; }
+.lede { font-size: var(--step-1); color: var(--muted); max-width: 36ch; line-height: 1.5; }
 .hero-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .btn {
-  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-  font-weight: 500; font-size: var(--step--1); padding: 10px 16px; border-radius: 8px;
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer;
+  font: 500 var(--step--1)/1.2 var(--font-body); padding: 10px 16px; border-radius: 8px;
   border: 1px solid var(--line); color: var(--ink); background: var(--surface);
 }
 .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn:hover { border-color: var(--accent); }
 
 /* Telemetry panel */
+.panel-wrap { min-width: 0; display: grid; gap: 10px; }
 .panel {
-  min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  margin: 0; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   font-family: var(--font-mono); font-size: .78rem; overflow: hidden;
   box-shadow: 0 18px 40px -24px rgba(10, 30, 28, .35);
 }
 .panel-head { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--muted); }
 .panel-body { overflow-x: auto; padding-block: 6px; }
-.log { display: grid; grid-template-columns: auto auto 1fr; gap: 0 14px; padding: 6px 14px; white-space: nowrap; color: var(--muted); }
+.log { display: grid; grid-template-columns: 4.6em 4.2em 1fr; gap: 0 12px; padding: 6px 14px; white-space: nowrap; color: var(--muted); }
 .log .t { font-variant-numeric: tabular-nums; }
 .log .src { color: var(--ink); opacity: .75; }
 .log .msg { color: var(--ink); }
 .log.hit { background: var(--flag-soft); box-shadow: inset 3px 0 0 var(--flag); }
 .log.hit .msg { color: var(--flag); font-weight: 500; }
 .log.ok .msg { color: var(--accent); }
+.panel.eng .log { grid-template-columns: 1.2em 5.8em 1fr; }
+.log .src:empty { display: none; }
+.log .src:empty + .msg { grid-column: 2 / -1; }
 .verdict {
-  display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; padding: 12px 14px;
+  display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 12px 14px;
   border-top: 1px solid var(--line); color: var(--muted); white-space: normal;
 }
 .verdict b { color: var(--flag); font-weight: 500; }
 .verdict.ok b { color: var(--accent); }
+.rule-toggle {
+  margin-left: auto; font: 500 .75rem/1 var(--font-mono); color: var(--accent); background: var(--accent-soft);
+  border: 0; border-radius: 6px; padding: 7px 10px; cursor: pointer;
+}
+.rule { border-top: 1px solid var(--line); background: var(--code-bg); }
+.rule-cap { padding: 10px 14px 0; color: var(--muted); font-size: .74rem; white-space: normal; }
+.rule pre { margin: 0; padding: 10px 14px 14px; overflow-x: auto; font: .74rem/1.55 var(--font-mono); color: var(--ink); }
+.rule .k { color: var(--accent); }
+.rule .c { color: var(--muted); }
+.panel-note { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) {
   .log.hit { animation: pulse 1.6s ease-out .6s 2; }
   @keyframes pulse { 50% { background: color-mix(in srgb, var(--flag) 22%, transparent); } }
 }
 
 /* Sections */
-section { padding-block: 56px; border-top: 1px solid var(--line); }
-.sec-head { display: grid; gap: 10px; margin-bottom: 32px; max-width: 62ch; }
+section { padding-block: 56px; border-top: 1px solid var(--line); scroll-margin-top: 64px; }
+.sec-head { display: grid; gap: 10px; margin-bottom: 32px; max-width: 64ch; }
 .sec-head p:not(.eyebrow) { color: var(--muted); }
 
 /* Strengths */
@@ -161,19 +184,21 @@ section { padding-block: 56px; border-top: 1px solid var(--line); }
 }
 .strength.lead { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .strength .top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-.strength .rank { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.strength .rank { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); white-space: nowrap; }
+.strength .lead-tag { color: var(--accent); }
 .strength ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; color: var(--muted); font-size: .94rem; }
 .strength li::marker { color: var(--accent); }
 .evidence { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; }
-.evidence a { color: var(--accent); }
 
-/* Projects */
+/* Projects: the first card for the current view spans the full width */
 .projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .project {
   display: grid; gap: 12px; align-content: start; min-width: 0;
   padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
 }
-.project .kind { display: flex; justify-content: space-between; gap: 12px; }
+.project > .p-main, .project > .p-side { display: contents; }
+.project:first-child { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 32px; }
+.project:first-child > .p-main, .project:first-child > .p-side { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .project p { color: var(--muted); font-size: .95rem; }
 .project ul { margin: 0; padding-left: 1.1em; display: grid; gap: 5px; color: var(--muted); font-size: .92rem; }
 .figure { font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); color: var(--accent); letter-spacing: -.02em; }
@@ -202,16 +227,17 @@ section { padding-block: 56px; border-top: 1px solid var(--line); }
 .stat b { display: block; font-family: var(--font-display); font-size: var(--step-3); font-weight: 800; letter-spacing: -.02em; line-height: 1; font-variant-numeric: tabular-nums; }
 .stat span { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
 .langs { display: grid; gap: 10px; }
-.lang { display: grid; grid-template-columns: 92px minmax(0, 1fr) 52px; gap: 12px; align-items: center; font-size: .9rem; }
-.lang .track { height: 8px; background: var(--heat-0); border-radius: 4px; overflow: hidden; }
-.lang .fill { height: 100%; background: var(--accent); border-radius: 4px; }
-.lang .n { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.lang-row { display: grid; grid-template-columns: 92px minmax(0, 1fr) 52px; gap: 12px; align-items: center; font-size: .9rem; }
+.lang-row .track { height: 8px; background: var(--heat-0); border-radius: 4px; overflow: hidden; }
+.lang-row .fill { height: 100%; background: var(--accent); border-radius: 4px; }
+.lang-row .n { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Toolbox */
 .sync { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
 .sync::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 .sync.live::before { background: var(--accent); }
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.tool-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
 .tabs button {
   font: 500 var(--step--1)/1 var(--font-body); padding: 9px 14px; border-radius: 8px; cursor: pointer;
   border: 1px solid var(--line); background: var(--surface); color: var(--muted);
@@ -219,6 +245,12 @@ section { padding-block: 56px; border-top: 1px solid var(--line); }
 }
 .tabs button span { font-family: var(--font-mono); font-size: .72rem; font-variant-numeric: tabular-nums; }
 .tabs button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); box-shadow: 0 0 0 1px var(--ink) inset; }
+.tabs.dim button { opacity: .5; }
+.search {
+  font: 400 var(--step--1)/1 var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; width: min(100%, 260px);
+}
+.search::placeholder { color: var(--muted); }
 .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .tool {
   display: grid; gap: 4px; min-width: 0; padding: 14px 16px; text-decoration: none;
@@ -228,26 +260,37 @@ section { padding-block: 56px; border-top: 1px solid var(--line); }
 .tool .nm { font-family: var(--font-mono); font-size: .85rem; font-weight: 500; overflow-wrap: anywhere; }
 .tool .ds { font-size: .82rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .tool .st { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: .95rem; padding-block: 12px; }
 .more { margin-top: 16px; font-size: .9rem; }
 
 /* Background & contact */
-.rows { display: grid; gap: 0; border-top: 1px solid var(--line); }
-.row { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; padding-block: 20px; border-bottom: 1px solid var(--line); }
+.rows { display: grid; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; padding-block: 20px; border-bottom: 1px solid var(--line); }
 .row h3 { font-size: var(--step-0); }
-.row p { color: var(--muted); max-width: 62ch; }
+.row p { color: var(--muted); max-width: 64ch; }
+.contact-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.targets { display: grid; gap: 12px; }
+.targets ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.targets li {
+  display: flex; gap: 12px; align-items: baseline; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-weight: 500;
+}
+.targets li span { font-family: var(--font-mono); font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.targets li:first-child { border-color: var(--accent); }
 .contact { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
 
 @media (max-width: 860px) {
-  .hero .wrap, .activity { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .hero .wrap, .activity, .contact-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .hero .wrap { padding-block: 40px; }
-  .projects { grid-template-columns: minmax(0, 1fr); }
+  .projects, .project:first-child { grid-template-columns: minmax(0, 1fr); }
   .row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }
 @media (max-width: 480px) {
   .strengths { grid-template-columns: minmax(0, 1fr); }
   .switch-label { display: none; }
-  .seg button { padding: 8px 11px; }
+  .seg button { padding: 8px 10px; }
+  .search { width: 100%; }
 }
 </style>
 </head>
@@ -255,41 +298,49 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
 
 <header class="bar">
   <div class="wrap">
-    <a class="handle" href="#security"><span class="mark" aria-hidden="true">c2</span><span id="who">cliy0-2</span></a>
-    <div class="switch">
-      <span class="switch-label">View as</span>
-      <div class="seg" role="group" aria-label="Choose a profile">
+    <a class="handle" href="#top"><span class="mark" aria-hidden="true">c2</span><span id="who">cliy0-2</span></a>
+    <div class="controls">
+      <span class="switch-label" data-i18n="viewAs">View as</span>
+      <div class="seg" id="role-seg" role="group" aria-label="Profile">
         <button type="button" data-role="security" aria-pressed="true">Security</button>
         <button type="button" data-role="engineering" aria-pressed="false">Engineering</button>
         <button type="button" data-role="everything" aria-pressed="false">Everything</button>
+      </div>
+      <div class="seg lang" id="lang-seg" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+        <button type="button" data-lang="fr" aria-pressed="false" lang="fr">FR</button>
       </div>
     </div>
   </div>
 </header>
 
-<main>
+<main id="top">
   <div class="hero">
     <div class="wrap">
       <div class="hero-text">
-        <span class="status">Open to on-site and hybrid roles</span>
-        <h1 id="headline">I read logs for the <em>one line</em> that doesn't add up.</h1>
+        <span class="status" data-i18n="status">Open to on-site and hybrid roles</span>
+        <h1 data-i18n="headline">I read logs for the <em>one line</em> that doesn't add up.</h1>
         <p class="role-title" id="role-title">Detection &amp; SOC engineer</p>
-        <p class="lede" id="lede"></p>
+        <p class="lede" id="lede">I turn raw telemetry into detections that hold up.</p>
         <div class="hero-links">
-          <a class="btn primary" href="#work">Selected work</a>
-          <a class="btn" id="gh-link" href="https://github.com/cliy0-2" target="_blank" rel="noopener">GitHub profile</a>
+          <a class="btn primary" href="#work" data-i18n="btnWork">Selected work</a>
+          <a class="btn" href="#contact" data-i18n="btnContact">Roles I'm looking for</a>
+          <a class="btn" href="https://github.com/cliy0-2" target="_blank" rel="noopener">GitHub</a>
         </div>
       </div>
-      <figure class="panel" id="panel" aria-label="Sample telemetry"></figure>
+      <div class="panel-wrap">
+        <figure class="panel" id="panel"></figure>
+        <p class="panel-note" id="panel-note"></p>
+      </div>
     </div>
   </div>
 
   <section id="strengths">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">Strengths</p>
-        <h2 id="strengths-title">Where I'm strongest</h2>
-        <p>Ordered for the view you picked. The numbers under each area come from the open-source tools I follow on GitHub, so they update with it.</p>
+        <p class="eyebrow" data-i18n="strEyebrow">Strengths</p>
+        <h2 data-i18n="strTitle">Where I'm strongest</h2>
+        <p data-i18n="strDesc">Ordered for the view you picked.</p>
       </div>
       <div class="strengths" id="strength-list"></div>
     </div>
@@ -298,9 +349,9 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
   <section id="work">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">Selected work</p>
-        <h2>Things I built and took apart</h2>
-        <p>Most of this lives in private repositories. I'm happy to walk through any of it in an interview.</p>
+        <p class="eyebrow" data-i18n="workEyebrow">Selected work</p>
+        <h2 data-i18n="workTitle">Things I built and took apart</h2>
+        <p data-i18n="workDesc">Most of this lives in private repositories.</p>
       </div>
       <div class="projects" id="project-list"></div>
     </div>
@@ -309,21 +360,21 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
   <section id="activity">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">GitHub activity</p>
-        <h2>What the commit log says</h2>
-        <p>Commits across all my repositories over the last 26 weeks, private ones included. Only the counts are published.</p>
+        <p class="eyebrow" data-i18n="actEyebrow">GitHub activity</p>
+        <h2 data-i18n="actTitle">What the commit log says</h2>
+        <p data-i18n="actDesc">Commits across all my repositories over the last 26 weeks.</p>
       </div>
       <div class="activity">
         <div>
           <div class="stats" id="stats"></div>
-          <div class="heat-scroll"><div class="heat" id="heat" role="img" aria-label="Commit activity heatmap"></div></div>
+          <div class="heat-scroll"><div class="heat" id="heat" role="img" aria-label="Commit activity"></div></div>
           <div class="heat-meta">
             <span id="heat-range"></span>
-            <span class="legend">Less <i style="background:var(--heat-0)"></i><i style="background:color-mix(in srgb, var(--accent) 30%, var(--heat-0))"></i><i style="background:color-mix(in srgb, var(--accent) 55%, var(--heat-0))"></i><i style="background:color-mix(in srgb, var(--accent) 78%, var(--heat-0))"></i><i style="background:var(--accent)"></i> More</span>
+            <span class="legend"><span data-i18n="less">Less</span> <i style="background:var(--heat-0)"></i><i style="background:color-mix(in srgb, var(--accent) 30%, var(--heat-0))"></i><i style="background:color-mix(in srgb, var(--accent) 55%, var(--heat-0))"></i><i style="background:color-mix(in srgb, var(--accent) 78%, var(--heat-0))"></i><i style="background:var(--accent)"></i> <span data-i18n="more">More</span></span>
           </div>
         </div>
         <div>
-          <h3 style="margin-bottom:16px">Languages I ship in</h3>
+          <h3 style="margin-bottom:16px" data-i18n="langTitle">Languages in my repositories</h3>
           <div class="langs" id="langs"></div>
         </div>
       </div>
@@ -333,21 +384,24 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
   <section id="toolbox">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">Toolbox</p>
-        <h2>The tools I study and use</h2>
-        <p>Pulled from the repositories I star on GitHub and sorted by area. <span class="sync" id="sync">Snapshot</span></p>
+        <p class="eyebrow" data-i18n="toolEyebrow">Toolbox</p>
+        <h2 data-i18n="toolTitle">The tools I study and use</h2>
+        <p><span data-i18n="toolDesc">Pulled from the repositories I star on GitHub and sorted by area.</span> <span class="sync" id="sync">Snapshot</span></p>
       </div>
-      <div class="tabs" id="tabs" role="group" aria-label="Tool areas"></div>
+      <div class="tool-bar">
+        <div class="tabs" id="tabs" role="group" aria-label="Areas"></div>
+        <input class="search" id="tool-search" type="search" autocomplete="off" aria-label="Search tools">
+      </div>
       <div class="tools" id="tools"></div>
-      <p class="more"><a href="https://github.com/cliy0-2?tab=stars" target="_blank" rel="noopener" id="all-stars">See every starred repository on GitHub</a></p>
+      <p class="more"><a href="https://github.com/cliy0-2?tab=stars" target="_blank" rel="noopener" id="all-stars">GitHub stars</a></p>
     </div>
   </section>
 
   <section id="background">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">Background</p>
-        <h2>How I got here</h2>
+        <p class="eyebrow" data-i18n="bgEyebrow">Background</p>
+        <h2 data-i18n="bgTitle">How I got here</h2>
       </div>
       <div class="rows" id="rows"></div>
     </div>
@@ -355,12 +409,18 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
 
   <section id="contact">
     <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Contact</p>
-        <h2>Let's talk about your team</h2>
-        <p>I'm looking to move from remote freelance back to an on-site team. If your SOC, security or platform team needs someone who can read the logs and the binary, get in touch.</p>
+      <div class="contact-grid">
+        <div class="sec-head" style="margin-bottom:0">
+          <p class="eyebrow" data-i18n="ctEyebrow">Contact</p>
+          <h2 data-i18n="ctTitle">Let's talk about your team</h2>
+          <p data-i18n="ctDesc">I'm looking to move from remote freelance back to an on-site team.</p>
+          <div class="contact" id="contact-links" style="margin-top:12px"></div>
+        </div>
+        <div class="targets">
+          <p class="eyebrow" data-i18n="targetsTitle">Roles I'm looking for</p>
+          <ol id="targets"></ol>
+        </div>
       </div>
-      <div class="contact" id="contact-links"></div>
     </div>
   </section>
 </main>
@@ -368,11 +428,11 @@ footer .wrap { padding-block: 32px 48px; display: flex; justify-content: space-b
 <footer>
   <div class="wrap">
     <span id="foot-sync"></span>
-    <span>Built from my GitHub with a small sync script.</span>
+    <span data-i18n="footBuilt">Built from my GitHub with a small sync script.</span>
   </div>
 </footer>
 
-<script type="application/json" id="snapshot">{"generated":"2026-11-26","user":"cliy0-2","avatar":"https://avatars.githubusercontent.com/u/316874664?v=4","repos_total":12,"repos_private":11,"last_push":"2026-11-25","languages":[["Python",9],["Shell",8],["HTML",5],["C",4],["JavaScript",4],["PHP",3],["CSS",3],["Kotlin",2],["TypeScript",2],["Assembly",2]],"days":{"2026-08-14":4,"2026-08-25":9,"2026-08-26":1,"2026-11-05":4,"2026-11-06":7,"2026-11-08":5,"2026-11-09":1,"2026-11-11":32,"2026-11-12":70,"2026-11-13":21,"2026-11-14":31,"2026-11-15":16,"2026-11-16":20,"2026-11-18":1,"2026-11-19":73,"2026-11-20":36,"2026-11-21":45,"2026-11-22":61,"2026-11-23":26,"2026-11-24":13,"2026-11-25":2},"stars":[{"d":"MCP server for JADX-AI Plugin","l":"Python","n":"zinja-coder/jadx-mcp-server","s":859},{"d":"🔐 Run frida-server on boot with Magisk, always up-to-date","l":"Shell","n":"ViRb3/magisk-frida","s":1491},{"d":"AD Enum is a pentesting tool that allows to find misconfiguration through the the protocol LDAP and exploit some of those weaknesses with kerberos.","l":"Python","n":"SecuProject/ADenum","s":320},{"d":"List of open source tools for AWS security: defensive, offensive, auditing, DFIR, etc.","l":"Shell","n":"toniblyx/my-arsenal-of-aws-security-tools","s":9542},{"d":"Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders","l":"Shell","n":"mitchellkrogza/nginx-ultimate-bad-bot-blocker","s":4848},{"d":"Snort++","l":"C++","n":"snort3/snort3","s":3487},{"d":"Spray365 makes spraying Microsoft accounts (Office 365 / Azure AD) easy through its customizable two-step password spraying approach. The built-in execution plan features options that attempt to bypass Azure Smart Lockout and insecure conditional access policies.","l":"Python","n":"MarkoH17/Spray365","s":383},{"d":"ADExplorerSnapshot.py is an AD Explorer snapshot parser. It is made as an ingestor for BloodHound via BOFHound, and also supports full-object dumping to NDJSON.","l":"Python","n":"c3c/ADExplorerSnapshot","s":1112},{"d":"Display and control your Android device","l":"C","n":"Genymobile/scrcpy","s":155754},{"d":"PowerShell framework to assess Azure security","l":"PowerShell","n":"hausec/PowerZure","s":1308},{"d":"Scripts to make password spraying attacks against Lync/S4B, OWA & O365 a lot quicker, less painful and more efficient","l":"Python","n":"byt3bl33d3r/SprayingToolkit","s":1580},{"d":"Collection of Scripts for shodan searching stuff.","l":"Python","n":"random-robbie/My-Shodan-Scripts","s":1161},{"d":"Exploitation paths allowing you to (mis)use the Windows Privileges to elevate your rights within the OS.","l":"","n":"gtworek/Priv2Admin","s":2534},{"d":"Socks proxy, and reverse socks server using powershell. ","l":"PowerShell","n":"p3nt4/Invoke-SocksProxy","s":813},{"d":"Traefik plugin to proxy requests to owasp/modsecurity-crs:apache container","l":"Go","n":"acouvreur/traefik-modsecurity-plugin","s":179},{"d":"ZMap is a fast single packet network scanner designed for Internet-wide network surveys.","l":"C","n":"zmap/zmap","s":6440},{"d":"Exploiting CVE-2021-44228 in VMWare Horizon for remote code execution and more.","l":"Python","n":"puzzlepeaches/Log4jHorizon","s":120},{"d":"Check, exploit, generate class, obfuscate, TLS, ACME about log4j2 vulnerability in one Go program.","l":"Go","n":"For-ACGN/Log4Shell","s":59},{"d":"dnscrypt-proxy 2 - A flexible DNS proxy, with support for encrypted DNS protocols.","l":"Go","n":"DNSCrypt/dnscrypt-proxy","s":13884},{"d":"The dynamic infrastructure framework for everybody! Distribute the workload of many different scanning tools with ease, including nmap, ffuf, masscan, nuclei, meg and many more!","l":"Shell","n":"pry0cc/axiom","s":4440},{"d":"An Office365 User Attack Tool","l":"Go","n":"optiv/Go365","s":652},{"d":"This Python script can be used to bypass IP source restrictions using HTTP headers.","l":"Python","n":"p0dalirius/ipsourcebypass","s":406},{"d":"Monitor creation, deletion and changes to LDAP objects live during your pentest or system administration! ","l":"C#","n":"p0dalirius/LDAPmonitor","s":951},{"d":"403/401 bypass tool: finds HTTP access-control bypasses via path, method, header and raw-request mutations. Baseline diff, auto-calibration, replayable curl evidence.","l":"Go","n":"devploit/nomore403","s":1932},{"d":"Attack Surface Discovery tool built on a microservice approach, utilizing multi-threading for fast, internet-scale asset indexing","l":"Python","n":"alechilczenko/kimi","s":265},{"d":"OWASP dep-scan is a next-generation security and risk audit tool based on known vulnerabilities, advisories, and license limitations for project dependencies. Both local repositories and container images are supported as the input, and the tool is ideal for integration.","l":"Python","n":"owasp-dep-scan/dep-scan","s":1471},{"d":"An evil bit backdoor for iptables","l":"C","n":"FlamingSpork/iptable_evil","s":56},{"d":"A Linux Packet Sniffing Suite for Automated MiTM Attacks ","l":"Python","n":"josh0xA/Espionage","s":253},{"d":"An Instagram OSINT tool to collect all the geotagged locations available on an Instagram profile in order to plot them on a map, and dump them in a JSON.","l":"Python","n":"bernsteining/instaloctrack","s":323},{"d":"BCC - Tools for BPF-based Linux IO analysis, networking, monitoring, and more","l":"C","n":"iovisor/bcc","s":22768},{"d":"Cover your tracks during Linux Exploitation by leaving zero traces on system logs and filesystem timestamps.","l":"Rust","n":"mufeedvh/moonwalk","s":1493},{"d":"A unit tested set of tools written in Python to scrape / collect data visible by a logged-in user from Facebook","l":"Python","n":"hubertlacote/fb-scraping-tools","s":15},{"d":"The FLARE team's open-source tool to identify capabilities in executable files.","l":"Python","n":"mandiant/capa","s":6363},{"d":"A high performance TCP SYN port scanner.","l":"Rust","n":"resyncgg/armada","s":318},{"d":"Fast and multi-platform Spotify client with native GUI","l":"Rust","n":"jpochyla/psst","s":9519},{"d":"reNgine is an automated reconnaissance framework for web applications with a focus on highly configurable streamlined recon process via Engines, recon data correlation and organization, continuous monitoring, backed by a database, and simple yet intuitive User Interface. reNgine makes it easy for penetration testers to gather reconnaissance with minimal configuration and with the help of reNgine's correlation, it just makes recon effortless.","l":"HTML","n":"yogeshojha/rengine","s":8963},{"d":"AADInternals PowerShell module for administering Azure AD and Office 365","l":"PowerShell","n":"Gerenios/AADInternals","s":1709},{"d":"Username enumeration and password spraying tool aimed at Microsoft O365.","l":"Python","n":"0xZDH/o365spray","s":1076},{"d":"MailSniper is a penetration testing tool for searching through email in a Microsoft Exchange environment for specific terms (passwords, insider intel, network architecture information, etc.). It can be used as a non-administrative user to search their own email, or by an administrator to search the mailboxes of every user in a domain.","l":"PowerShell","n":"dafthack/MailSniper","s":3298},{"d":"SMBMap is a handy SMB enumeration tool","l":"Python","n":"ShawnDEvans/smbmap","s":2103},{"d":"Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.","l":"TypeScript","n":"n8n-io/n8n","s":212167},{"d":"Best practices for segmentation of the corporate network of any company","l":"","n":"sergiomarotco/Network-segmentation-cheat-sheet","s":3505},{"d":"Docker tooling for OpenResty","l":"Dockerfile","n":"openresty/docker-openresty","s":1041},{"d":"Docker container for managing Nginx proxy hosts with a simple, powerful interface","l":"JavaScript","n":"NginxProxyManager/nginx-proxy-manager","s":34894},{"d":"🥀 Search Engine Tookit，URL采集、Favicon哈希值查找真实IP、子域名查找","l":"Python","n":"j3ers3/Searpy","s":215},{"d":"a patched sshd for red team activities","l":"C","n":"QAX-A-Team/openssh-7.6p1-patch","s":87},{"d":"Vajra is a UI-based tool with multiple techniques for attacking and enumerating in the target's Azure and AWS environment. It features an intuitive web-based user interface built with the Python Flask module for a better user experience. The primary focus of this tool is to have different attacking techniques all at one place with web UI interfaces.","l":"CSS","n":"TROUBLE-1/Vajra","s":410},{"d":"Remote Command Executor: A OSS replacement for PsExec and RunAs - or Telnet without having to install a server.  Take your pick :)","l":"C++","n":"kavika13/RemCom","s":375},{"d":"☄🌌️  The minimal, blazing-fast, and infinitely customizable prompt for any shell!","l":"Rust","n":"starship/starship","s":60928},{"d":"A root exploit for CVE-2022-0847 (Dirty Pipe)","l":"C","n":"Arinerron/CVE-2022-0847-DirtyPipe-Exploit","s":1142},{"d":"Ansible-based solution for rapidly deploying a Docker containerized cloud media server.","l":"Shell","n":"Cloudbox/Cloudbox","s":2375},{"d":"WELA (Windows Event Log Analyzer): The Swiss Army knife for Windows Event Logs! ゑ羅（ウェラ）","l":"PowerShell","n":"Yamato-Security/WELA-deprecated","s":776},{"d":"A fancy self-hosted monitoring tool","l":"JavaScript","n":"louislam/uptime-kuma","s":94905},{"d":"game of active directory","l":"PowerShell","n":"Orange-Cyberdefense/GOAD","s":8664},{"d":":key: A CLI tool to identify the hash type of a given hash.","l":"Ruby","n":"Orange-Cyberdefense/haiti","s":115},{"d":"Transfer files to and from a Windows host via ICMP in restricted network environments.","l":"Python","n":"icyguider/ICMP-TransferTools","s":336},{"d":"Merlin is a cross-platform post-exploitation HTTP/2 Command & Control  server and agent written in golang.","l":"Go","n":"Ne0nd0g/merlin","s":5644},{"d":"Decode All Bases - Base Scheme Decoder","l":"Python","n":"mufeedvh/basecrack","s":588},{"d":"ThePhish: an automated phishing email analysis tool","l":"Python","n":"emalderson/ThePhish","s":1386},{"d":"Network Analysis Tool","l":"C#","n":"odedshimon/BruteShark","s":3434},{"d":"uDork is a script written in Bash Scripting that uses advanced Google search techniques to obtain sensitive information in files or directories, find IoT devices, detect versions of web applications, and so on.","l":"Shell","n":"m3n0sd0n4ld/uDork","s":872},{"d":"HomePwn - Swiss Army Knife for Pentesting of IoT Devices","l":"Python","n":"Telefonica/HomePWN","s":936},{"d":"Glances an Eye on your system. A top/htop alternative for GNU/Linux, BSD, macOS and Windows operating systems.","l":"Python","n":"nicolargo/glances","s":34014},{"d":"","l":"Python","n":"carlospolop/Auto_Wordlists","s":1432},{"d":"Netcat for windows 32/64 bit","l":"C","n":"int0x33/nc.exe","s":830},{"d":"PEASS - Privilege Escalation Awesome Scripts SUITE (with colors)","l":"C#","n":"peass-ng/PEASS-ng","s":20899},{"d":"Sysmon event simulation utility which can be used to simulate the attacks to generate the Sysmon Event logs for testing the EDR detections and correlation rules by Blue teams.","l":"C","n":"ScarredMonk/SysmonSimulator","s":875},{"d":"A C# tool that detects when a computer account is added to any of the created domain security groups. ","l":"C#","n":"ScarredMonk/Detect-Evil-Machine","s":4},{"d":"Powershell script to build active directory forest and populate AD with random AD objects including AD users objects, computers objects, groups objects, GPOs and network shares required. It also adds ASREProast account, kerberoastable account, and misconfigured ACLs to the domain for testing purposes","l":"PowerShell","n":"ScarredMonk/PopulateActiveDirectory","s":43},{"d":"Utilize misconfigured DNS and old database records to find hidden IP's behind the CloudFlare network","l":"Python","n":"m0rtem/CloudFail","s":2697},{"d":"Accurately Locate Smartphones using Social Engineering ","l":"CSS","n":"thewhiteh4t/seeker","s":10359},{"d":"A list of useful payloads and bypass for Web Application Security and Pentest/CTF","l":"Python","n":"swisskyrepo/PayloadsAllTheThings","s":82958},{"d":"An HTTP toolkit for security research.","l":"Go","n":"dstotijn/hetty","s":12562},{"d":"PowerShell module to export a local copy of an Entra (Azure AD) tenant configuration.","l":"PowerShell","n":"microsoft/EntraExporter","s":890},{"d":"The first open-source DDoS protection system","l":"C","n":"AltraMayor/gatekeeper","s":1657},{"d":"A node js script to protect from ddos in Layer 7 under nginx","l":"JavaScript","n":"Anatik572/KeepSafe","s":28},{"d":"Exploit for CVE-2022-21999 - Windows Print Spooler Elevation of Privilege Vulnerability (LPE)","l":"C#","n":"ly4k/SpoolFool","s":793},{"d":"A curated list of awesome search engines useful during Penetration testing, Vulnerability assessments, Red/Blue Team operations, Bug Bounty and more","l":"Shell","n":"edoardottt/awesome-hacker-search-engines","s":11569},{"d":"Nuclei Templates Collection","l":"Python","n":"emadshanab/Nuclei-Templates-Collection","s":1224},{"d":"Community curated list of templates for the nuclei engine to find security vulnerabilities.","l":"JavaScript","n":"projectdiscovery/nuclei-templates","s":13417},{"d":"Simple extension that allows to run nuclei scanner directly from burp and transforms json results into the issues.","l":"Python","n":"dbrwsky/Nuclei-BurpExtension","s":118},{"d":"Windows x64 handcrafted token stealing kernel-mode shellcode","l":"Assembly","n":"winterknife/PINKPANTHER","s":516},{"d":"🖥️ P2P Remote Desktop - Portable peer-to-peer remote desktop with no installation required.","l":"C#","n":"miroslavpejic85/p2p","s":4101},{"d":"Gather and update all available and newest CVEs with their PoC.","l":"HTML","n":"trickest/cve","s":8251},{"d":"Multi-threaded URL enumeration/content-discovery tool in Python.","l":"Python","n":"0xTas/zenbuster","s":106},{"d":"An advanced tool for working with access tokens and Windows security policy.","l":"Pascal","n":"diversenok/TokenUniverse","s":673},{"d":"Unified ingress for developers","l":"Go","n":"inconshreveable/ngrok","s":24373},{"d":"Analyzing AD domains for security risks related to user accounts","l":"","n":"ST1LLY/dc-sonar","s":66},{"d":"Extract Windows Wi-Fi Passwords to Remote URL","l":"Python","n":"hmaverickadams/Windows-WiFi-Extractor","s":289},{"d":"BlueHound - pinpoint the security issues that actually matter","l":"TypeScript","n":"zeronetworks/BlueHound","s":787},{"d":"A Windows reverse shell payload generator and handler that abuses the http(s) protocol to establish a beacon-like reverse shell.","l":"Python","n":"t3l3machus/hoaxshell","s":3514},{"d":"This publication is a collection of various common attack scenarios on Microsoft Entra ID (formerly known as Azure Active Directory) and how they can be mitigated or detected.","l":"PowerShell","n":"Cloud-Architekt/AzureAD-Attack-Defense","s":2588},{"d":"Speculation control powershell script","l":"PowerShell","n":"microsoft/SpeculationControl","s":163},{"d":"SpecuCheck is a Windows utility for checking the state of the software mitigations and hardware against  CVE-2017-5754 (Meltdown), CVE-2017-5715 (Spectre v2), CVE-2018-3260 (Foreshadow), and CVE-2018-3639 (Spectre v4)","l":"C","n":"ionescu007/SpecuCheck","s":586},{"d":"","l":"C","n":"theori-io/CVE-2022-32250-exploit","s":193},{"d":"UAC bypass by abusing RPC and debug objects.","l":"C++","n":"Kudaes/Elevator","s":629},{"d":"Extract TLS session keys from running programs","l":"C++","n":"KJTsanaktsidis/tlskeydump","s":9},{"d":"A Tool for Domain Flyovers","l":"Go","n":"michenriksen/aquatone","s":5960},{"d":"Take a list of domains and probe for working HTTP and HTTPS servers","l":"Go","n":"tomnomnom/httprobe","s":3124},{"d":"Spider entire networks for juicy files sitting on SMB shares.  Search filenames or file content - regex supported!","l":"Python","n":"blacklanternsecurity/MANSPIDER","s":1447},{"d":"Teamsniper is a tool for fetching keywords in a Microsoft Teams such as (passwords, emails, database, etc.). ","l":"Python","n":"xRET2pwn/Teamsniper","s":200},{"d":"Real-time HTTP Intrusion Detection","l":"Go","n":"teler-sh/teler","s":3081},{"d":"KrbRelayUp - a universal no-fix local privilege escalation in windows domain environments where LDAP signing is not enforced (the default settings).","l":"C#","n":"Dec0ne/KrbRelayUp","s":1691},{"d":"A collection of Azure AD/Entra tools for offensive and defensive security purposes","l":"Python","n":"dirkjanm/ROADtools","s":2780},{"d":"linWinPwn is a bash script that streamlines the use of a number of Active Directory tools","l":"Shell","n":"lefayjey/linWinPwn","s":2239},{"d":"transform your payload into ipv4/ipv6/mac arrays ","l":"C","n":"NUL0x4C/HellShell","s":266},{"d":"using the gpu to hide your payload","l":"C","n":"NUL0x4C/GP","s":67},{"d":"A python tool to automate KeePass discovery and secret extraction.","l":"Python","n":"Orange-Cyberdefense/KeePwn","s":531},{"d":"Advanced PHP deobfuscator","l":"PHP","n":"simon816/PHPDeobfuscator","s":136},{"d":"An updated drop-in for statping. A Status Page for monitoring your websites and applications with beautiful graphs, analytics, and plugins. Run on any type of environment.","l":"Go","n":"statping-ng/statping-ng","s":1994},{"d":"Status Page for monitoring your websites and applications with beautiful graphs, analytics, and plugins. Run on any type of environment.","l":"Vue","n":"statping/statping","s":7293},{"d":"A tool that allows you to create vulnerable instrumented local or cloud environments to simulate attacks against and collect the data into Splunk ","l":"Python","n":"splunk/attack_range","s":2586},{"d":"","l":"","n":"cursor/cursor","s":33362},{"d":"Planning To Take Certified Ethical Hacker (CEH)?  Here are github repo with 125 questions and answers to help you prep for the test","l":"","n":"ryh04x/CEH-Exam-Questions","s":1144},{"d":"Purpleteam scripts simulation & Detection - trigger events for SOC detections","l":"PowerShell","n":"mthcht/Purpleteam","s":208},{"d":"One place for all the default credentials to assist the Blue/Red teamers identifying devices with default password 🛡️","l":"Python","n":"ihebski/DefaultCreds-cheat-sheet","s":6844},{"d":"List of libraries, tools and APIs for web scraping and data processing.","l":"JavaScript","n":"lorien/awesome-web-scraping","s":8249},{"d":"With this script you can bypass both root detection and ssl pinning for your android app.","l":"","n":"CrackerCat/frida_rootandsslbypass","s":2},{"d":"React components to build charts and dashboards","l":"TypeScript","n":"tremorlabs/tremor-npm","s":16460},{"d":"It's React, but in Python","l":"Python","n":"reactive-python/reactpy","s":8149},{"d":"Securely and quickly copy data from source to target.","l":"C","n":"eeertekin/bbcp","s":260},{"d":"DedSec GRUB Theme  💀🖤","l":"Python","n":"VandalByte/dedsec-grub2-theme","s":559},{"d":"Arsenal is just a quick inventory and launcher for hacking programs","l":"Python","n":"Orange-Cyberdefense/arsenal","s":3827},{"d":"Totally Automatic LFI Exploiter (+ Reverse Shell) and Scanner ","l":"Python","n":"D35m0nd142/LFISuite","s":1974},{"d":"Encodes a PowerShell script in the pixels of a PNG file and generates a oneliner to execute","l":"PowerShell","n":"peewpw/Invoke-PSImage","s":2187},{"d":"A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.","l":"Python","n":"0xSolanaceae/proXXy","s":158},{"d":"SoTA LLM for converting natural language questions to SQL queries","l":"Jupyter Notebook","n":"defog-ai/sqlcoder","s":4046},{"d":"NucleiFuzzer is a robust automation tool that efficiently detects web application vulnerabilities, including XSS, SQLi, SSRF, and Open Redirects, leveraging advanced scanning and URL enumeration techniques","l":"Python","n":"0xKayala/NucleiFuzzer","s":2011},{"d":"reverse shell using curl","l":"Python","n":"irsl/curlshell","s":480},{"d":"apk.py makes reverse engineering Android apps easier, automating some repetitive tasks like pulling, decoding, rebuilding and patching an APK.","l":"Python","n":"81U380X/apk.py","s":14},{"d":"Asahi Linux installer","l":"Python","n":"AsahiLinux/asahi-installer","s":961},{"d":"PHP-FPM script that makes recommendations on max_children","l":"Shell","n":"pksteyn/php-fpmpal","s":59},{"d":"PHP-FPM status monitoring template for Zabbix with auto discovery (LLD), support for multiple pools and ISPConfig","l":"Shell","n":"rvalitov/zabbix-php-fpm","s":73},{"d":"Exploit code for CVE-2021-1961","l":"C","n":"tamirzb/CVE-2021-1961","s":121},{"d":"Dominate Active Directory with PowerShell. ","l":"PowerShell","n":"The-Viper-One/PsMapExec","s":1214},{"d":"A collection of CTF write-ups, pentesting topics, guides and notes. Notes compiled from multiple sources and my own lab research. Topics also support OSCP, Active Directory, CRTE, eJPT and eCPPT.","l":"","n":"The-Viper-One/Pentest-Everything","s":644},{"d":":snake: A toolkit for testing, tweaking and cracking JSON Web Tokens","l":"Python","n":"ticarpi/jwt_tool","s":6829},{"d":"Jan is an open source alternative to ChatGPT that runs 100% offline on your computer.","l":"Rust","n":"janhq/jan","s":46154},{"d":"macOS and Linux VMs on Apple Silicon to use in CI and other automations","l":"Swift","n":"openai/tart","s":8026},{"d":"A self-hosted BitTorrent indexer, DHT crawler, content classifier and torrent search engine with web UI, GraphQL API and Servarr stack integration.","l":"Go","n":"bitmagnet-io/bitmagnet","s":4477},{"d":"Mantis is a security framework that automates the workflow of discovery, reconnaissance, and vulnerability scanning.","l":"Python","n":"PhonePe/mantis","s":1044},{"d":"Fast, secure, efficient backup program","l":"Go","n":"restic/restic","s":37460},{"d":"PowerHuntShares is an audit script designed in inventory, analyze, and report excessive privileges configured on Active Directory domains.","l":"PowerShell","n":"NetSPI/PowerHuntShares","s":1080},{"d":"Tunnel TCP connections through a file","l":"C#","n":"fiddyschmitt/File-Tunnel","s":1133},{"d":"Python3 script to quickly get various information from a domain controller through his LDAP service.","l":"Python","n":"yaap7/ldapsearch-ad","s":354},{"d":"tomcat CVE-2024-50379/CVE-2024-56337 条件竞争文件上传exp","l":"Go","n":"SleepingBag945/CVE-2024-50379","s":85},{"d":"Debug, evaluate, and monitor your LLM applications, RAG systems, and agentic workflows with comprehensive tracing, automated evaluations, and production-ready dashboards.","l":"Java","n":"comet-ml/opik","s":23518},{"d":"all of the workflows of n8n i could find (also from the site itself)","l":"Python","n":"Zie619/n8n-workflows","s":57321},{"d":"The personal finance app for everyone","l":"Ruby","n":"maybe-finance/maybe","s":54184},{"d":"HexStrike AI MCP Agents is an advanced MCP server that lets AI agents (Claude, GPT, Copilot, etc.) autonomously run 150+ cybersecurity tools for automated pentesting, vulnerability discovery, bug bounty automation, and security research. Seamlessly bridge LLMs with real-world offensive security capabilities.","l":"Python","n":"0x4m4/hexstrike-ai","s":13920},{"d":"CheckCle is a self-hosted, open-source monitoring platform for seamless, real-time full-stack systems, applications, and infrastructure. It provides real-time uptime monitoring, distributed checks, incident tracking, and alerts. All deployable anywhere.","l":"Go","n":"operacle/checkcle","s":3330},{"d":"HexStrike AI MCP Agents is an advanced MCP server that lets AI agents (Claude, GPT, Copilot, etc.) autonomously run 150+ cybersecurity tools for automated pentesting, vulnerability discovery, bug bounty automation, and security research. Seamlessly bridge LLMs with real-world offensive security capabilities.","l":"Python","n":"CrackerCat/hexstrike-ai","s":3},{"d":"Customizable Linux Persistence Tool for Security Research and Detection Engineering.","l":"Shell","n":"Aegrah/PANIX","s":902},{"d":"Beautiful, Modern & Opinionated Linux","l":"Shell","n":"omacom/omarchy","s":47619},{"d":"A modular vulnerability scanner with automatic report generation capabilities.","l":"Python","n":"CERT-Polska/Artemis","s":1265},{"d":"Glamourous agentic coding for all 💘","l":"Go","n":"charmbracelet/crush","s":29208},{"d":"Netronome is a modern network speed testing and monitoring tool built with Go and React.","l":"Go","n":"autobrr/netronome","s":1459},{"d":"Proxy that exposes Antigravity provided claude / gemini models, so we can use them in Claude Code and OpenClaw (Clawdbot)","l":"JavaScript","n":"badrisnarayanan/antigravity-claude-proxy","s":4096},{"d":"Professional Antigravity Account Manager & Switcher. One-click seamless account switching for Antigravity Tools. Built with Tauri v2 + React (Rust).专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。","l":"Rust","n":"lbjlaq/Antigravity-Manager","s":34080},{"d":"Modern Docker Management, Designed for Everyone","l":"Go","n":"getarcaneapp/arcane","s":10497},{"d":"Stealth browser automation for AI agents over MCP and the Chrome DevTools Protocol: navigation, network hooks, DOM extraction, and pixel-accurate UI cloning.","l":"Python","n":"vibheksoni/stealth-browser-mcp","s":3389},{"d":"Connect like there is no firewall. Securely.","l":"C","n":"hackerschoice/gsocket","s":1990},{"d":"AI-Powered Reverse Engineering Plugin for IDA Pro","l":"Python","n":"symgraph/IDAssist","s":910},{"d":"A modern replacement for Redis and Memcached","l":"C++","n":"dragonflydb/dragonfly","s":31939},{"d":"A shell for wayland compositors","l":"QML","n":"ilyamiro/serpantinum","s":7806},{"d":"A True Instrumentable Binary Emulation Framework","l":"Python","n":"qilingframework/qiling","s":6205},{"d":"Hundreds of models & providers. One command to find what runs on your hardware.","l":"Rust","n":"AlexsJones/llmfit","s":39325},{"d":"Native web workspace for Hermes Agent — chat, terminal, memory, skills, inspector.","l":"JavaScript","n":"outsourc-e/hermes-workspace","s":6848},{"d":"Web UI consciousness monitor for Hermes — the AI agent with persistent memory","l":"Python","n":"joeynyc/hermes-hudui","s":1866},{"d":"The safest, simplest way to manage Hermes from your Mac. Pure SSH. No gateways, no exposed ports, no browser layer.","l":"Swift","n":"dodo-reach/hermes-desktop","s":2037},{"d":"Autonomous multi-session AI coding","l":"TypeScript","n":"AndyMik90/Aperant","s":14632},{"d":"Leantime is a goals focused project management system for non-project managers. Building with ADHD, Autism, and dyslexia in mind.","l":"PHP","n":"Leantime/leantime","s":12150},{"d":"Documentation and reverse engineering of reCAPTCHA","l":"","n":"CrackerCat/elyelysiox-recaptcha","s":2},{"d":"The fastest browser for AI agents to run browser automation, built for sharing your logged-in browser state with your AI agents, like Codex or Claude Code, without disturbing you. Zero cost, zero config.","l":"JavaScript","n":"citrolabs/ego-lite","s":24554}]}</script><!-- /snapshot -->
+<script type="application/json" id="snapshot">{"generated":"2026-11-26","user":"cliy0-2","avatar":"https://avatars.githubusercontent.com/u/316874664?v=4","repos_total":12,"repos_private":11,"last_push":"2026-11-25","languages":[["Python",9],["Shell",8],["HTML",5],["C",4],["JavaScript",4],["PHP",3],["CSS",3],["Kotlin",2],["TypeScript",2],["Assembly",2]],"days":{"2026-08-14":4,"2026-08-25":10,"2026-08-26":1,"2026-11-05":4,"2026-11-06":7,"2026-11-08":5,"2026-11-09":1,"2026-11-11":33,"2026-11-12":70,"2026-11-13":21,"2026-11-14":31,"2026-11-15":16,"2026-11-16":20,"2026-11-18":1,"2026-11-19":73,"2026-11-20":36,"2026-11-21":46,"2026-11-22":72,"2026-11-23":26,"2026-11-24":13,"2026-11-25":2},"stars":[{"d":"MCP server for JADX-AI Plugin","l":"Python","n":"zinja-coder/jadx-mcp-server","s":859},{"d":"🔐 Run frida-server on boot with Magisk, always up-to-date","l":"Shell","n":"ViRb3/magisk-frida","s":1491},{"d":"AD Enum is a pentesting tool that allows to find misconfiguration through the the protocol LDAP and exploit some of those weaknesses with kerberos.","l":"Python","n":"SecuProject/ADenum","s":320},{"d":"List of open source tools for AWS security: defensive, offensive, auditing, DFIR, etc.","l":"Shell","n":"toniblyx/my-arsenal-of-aws-security-tools","s":9542},{"d":"Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders","l":"Shell","n":"mitchellkrogza/nginx-ultimate-bad-bot-blocker","s":4848},{"d":"Snort++","l":"C++","n":"snort3/snort3","s":3487},{"d":"Spray365 makes spraying Microsoft accounts (Office 365 / Azure AD) easy through its customizable two-step password spraying approach. The built-in execution plan features options that attempt to bypass Azure Smart Lockout and insecure conditional access policies.","l":"Python","n":"MarkoH17/Spray365","s":383},{"d":"ADExplorerSnapshot.py is an AD Explorer snapshot parser. It is made as an ingestor for BloodHound via BOFHound, and also supports full-object dumping to NDJSON.","l":"Python","n":"c3c/ADExplorerSnapshot","s":1112},{"d":"Display and control your Android device","l":"C","n":"Genymobile/scrcpy","s":155754},{"d":"PowerShell framework to assess Azure security","l":"PowerShell","n":"hausec/PowerZure","s":1308},{"d":"Scripts to make password spraying attacks against Lync/S4B, OWA & O365 a lot quicker, less painful and more efficient","l":"Python","n":"byt3bl33d3r/SprayingToolkit","s":1580},{"d":"Collection of Scripts for shodan searching stuff.","l":"Python","n":"random-robbie/My-Shodan-Scripts","s":1161},{"d":"Exploitation paths allowing you to (mis)use the Windows Privileges to elevate your rights within the OS.","l":"","n":"gtworek/Priv2Admin","s":2534},{"d":"Socks proxy, and reverse socks server using powershell. ","l":"PowerShell","n":"p3nt4/Invoke-SocksProxy","s":813},{"d":"Traefik plugin to proxy requests to owasp/modsecurity-crs:apache container","l":"Go","n":"acouvreur/traefik-modsecurity-plugin","s":179},{"d":"ZMap is a fast single packet network scanner designed for Internet-wide network surveys.","l":"C","n":"zmap/zmap","s":6440},{"d":"Exploiting CVE-2021-44228 in VMWare Horizon for remote code execution and more.","l":"Python","n":"puzzlepeaches/Log4jHorizon","s":120},{"d":"Check, exploit, generate class, obfuscate, TLS, ACME about log4j2 vulnerability in one Go program.","l":"Go","n":"For-ACGN/Log4Shell","s":59},{"d":"dnscrypt-proxy 2 - A flexible DNS proxy, with support for encrypted DNS protocols.","l":"Go","n":"DNSCrypt/dnscrypt-proxy","s":13884},{"d":"The dynamic infrastructure framework for everybody! Distribute the workload of many different scanning tools with ease, including nmap, ffuf, masscan, nuclei, meg and many more!","l":"Shell","n":"pry0cc/axiom","s":4440},{"d":"An Office365 User Attack Tool","l":"Go","n":"optiv/Go365","s":652},{"d":"This Python script can be used to bypass IP source restrictions using HTTP headers.","l":"Python","n":"p0dalirius/ipsourcebypass","s":406},{"d":"Monitor creation, deletion and changes to LDAP objects live during your pentest or system administration! ","l":"C#","n":"p0dalirius/LDAPmonitor","s":951},{"d":"403/401 bypass tool: finds HTTP access-control bypasses via path, method, header and raw-request mutations. Baseline diff, auto-calibration, replayable curl evidence.","l":"Go","n":"devploit/nomore403","s":1932},{"d":"Attack Surface Discovery tool built on a microservice approach, utilizing multi-threading for fast, internet-scale asset indexing","l":"Python","n":"alechilczenko/kimi","s":265},{"d":"OWASP dep-scan is a next-generation security and risk audit tool based on known vulnerabilities, advisories, and license limitations for project dependencies. Both local repositories and container images are supported as the input, and the tool is ideal for integration.","l":"Python","n":"owasp-dep-scan/dep-scan","s":1471},{"d":"An evil bit backdoor for iptables","l":"C","n":"FlamingSpork/iptable_evil","s":56},{"d":"A Linux Packet Sniffing Suite for Automated MiTM Attacks ","l":"Python","n":"josh0xA/Espionage","s":253},{"d":"An Instagram OSINT tool to collect all the geotagged locations available on an Instagram profile in order to plot them on a map, and dump them in a JSON.","l":"Python","n":"bernsteining/instaloctrack","s":323},{"d":"BCC - Tools for BPF-based Linux IO analysis, networking, monitoring, and more","l":"C","n":"iovisor/bcc","s":22768},{"d":"Cover your tracks during Linux Exploitation by leaving zero traces on system logs and filesystem timestamps.","l":"Rust","n":"mufeedvh/moonwalk","s":1493},{"d":"A unit tested set of tools written in Python to scrape / collect data visible by a logged-in user from Facebook","l":"Python","n":"hubertlacote/fb-scraping-tools","s":15},{"d":"The FLARE team's open-source tool to identify capabilities in executable files.","l":"Python","n":"mandiant/capa","s":6363},{"d":"A high performance TCP SYN port scanner.","l":"Rust","n":"resyncgg/armada","s":318},{"d":"Fast and multi-platform Spotify client with native GUI","l":"Rust","n":"jpochyla/psst","s":9519},{"d":"reNgine is an automated reconnaissance framework for web applications with a focus on highly configurable streamlined recon process via Engines, recon data correlation and organization, continuous monitoring, backed by a database, and simple yet intuitive User Interface. reNgine makes it easy for penetration testers to gather reconnaissance with minimal configuration and with the help of reNgine's correlation, it just makes recon effortless.","l":"HTML","n":"yogeshojha/rengine","s":8963},{"d":"AADInternals PowerShell module for administering Azure AD and Office 365","l":"PowerShell","n":"Gerenios/AADInternals","s":1709},{"d":"Username enumeration and password spraying tool aimed at Microsoft O365.","l":"Python","n":"0xZDH/o365spray","s":1076},{"d":"MailSniper is a penetration testing tool for searching through email in a Microsoft Exchange environment for specific terms (passwords, insider intel, network architecture information, etc.). It can be used as a non-administrative user to search their own email, or by an administrator to search the mailboxes of every user in a domain.","l":"PowerShell","n":"dafthack/MailSniper","s":3298},{"d":"SMBMap is a handy SMB enumeration tool","l":"Python","n":"ShawnDEvans/smbmap","s":2103},{"d":"Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.","l":"TypeScript","n":"n8n-io/n8n","s":212169},{"d":"Best practices for segmentation of the corporate network of any company","l":"","n":"sergiomarotco/Network-segmentation-cheat-sheet","s":3505},{"d":"Docker tooling for OpenResty","l":"Dockerfile","n":"openresty/docker-openresty","s":1041},{"d":"Docker container for managing Nginx proxy hosts with a simple, powerful interface","l":"JavaScript","n":"NginxProxyManager/nginx-proxy-manager","s":34896},{"d":"🥀 Search Engine Tookit，URL采集、Favicon哈希值查找真实IP、子域名查找","l":"Python","n":"j3ers3/Searpy","s":215},{"d":"a patched sshd for red team activities","l":"C","n":"QAX-A-Team/openssh-7.6p1-patch","s":87},{"d":"Vajra is a UI-based tool with multiple techniques for attacking and enumerating in the target's Azure and AWS environment. It features an intuitive web-based user interface built with the Python Flask module for a better user experience. The primary focus of this tool is to have different attacking techniques all at one place with web UI interfaces.","l":"CSS","n":"TROUBLE-1/Vajra","s":410},{"d":"Remote Command Executor: A OSS replacement for PsExec and RunAs - or Telnet without having to install a server.  Take your pick :)","l":"C++","n":"kavika13/RemCom","s":375},{"d":"☄🌌️  The minimal, blazing-fast, and infinitely customizable prompt for any shell!","l":"Rust","n":"starship/starship","s":60928},{"d":"A root exploit for CVE-2022-0847 (Dirty Pipe)","l":"C","n":"Arinerron/CVE-2022-0847-DirtyPipe-Exploit","s":1142},{"d":"Ansible-based solution for rapidly deploying a Docker containerized cloud media server.","l":"Shell","n":"Cloudbox/Cloudbox","s":2375},{"d":"WELA (Windows Event Log Analyzer): The Swiss Army knife for Windows Event Logs! ゑ羅（ウェラ）","l":"PowerShell","n":"Yamato-Security/WELA-deprecated","s":776},{"d":"A fancy self-hosted monitoring tool","l":"JavaScript","n":"louislam/uptime-kuma","s":94905},{"d":"game of active directory","l":"PowerShell","n":"Orange-Cyberdefense/GOAD","s":8664},{"d":":key: A CLI tool to identify the hash type of a given hash.","l":"Ruby","n":"Orange-Cyberdefense/haiti","s":115},{"d":"Transfer files to and from a Windows host via ICMP in restricted network environments.","l":"Python","n":"icyguider/ICMP-TransferTools","s":336},{"d":"Merlin is a cross-platform post-exploitation HTTP/2 Command & Control  server and agent written in golang.","l":"Go","n":"Ne0nd0g/merlin","s":5644},{"d":"Decode All Bases - Base Scheme Decoder","l":"Python","n":"mufeedvh/basecrack","s":588},{"d":"ThePhish: an automated phishing email analysis tool","l":"Python","n":"emalderson/ThePhish","s":1386},{"d":"Network Analysis Tool","l":"C#","n":"odedshimon/BruteShark","s":3434},{"d":"uDork is a script written in Bash Scripting that uses advanced Google search techniques to obtain sensitive information in files or directories, find IoT devices, detect versions of web applications, and so on.","l":"Shell","n":"m3n0sd0n4ld/uDork","s":872},{"d":"HomePwn - Swiss Army Knife for Pentesting of IoT Devices","l":"Python","n":"Telefonica/HomePWN","s":936},{"d":"Glances an Eye on your system. A top/htop alternative for GNU/Linux, BSD, macOS and Windows operating systems.","l":"Python","n":"nicolargo/glances","s":34014},{"d":"","l":"Python","n":"carlospolop/Auto_Wordlists","s":1432},{"d":"Netcat for windows 32/64 bit","l":"C","n":"int0x33/nc.exe","s":830},{"d":"PEASS - Privilege Escalation Awesome Scripts SUITE (with colors)","l":"C#","n":"peass-ng/PEASS-ng","s":20899},{"d":"Sysmon event simulation utility which can be used to simulate the attacks to generate the Sysmon Event logs for testing the EDR detections and correlation rules by Blue teams.","l":"C","n":"ScarredMonk/SysmonSimulator","s":875},{"d":"A C# tool that detects when a computer account is added to any of the created domain security groups. ","l":"C#","n":"ScarredMonk/Detect-Evil-Machine","s":4},{"d":"Powershell script to build active directory forest and populate AD with random AD objects including AD users objects, computers objects, groups objects, GPOs and network shares required. It also adds ASREProast account, kerberoastable account, and misconfigured ACLs to the domain for testing purposes","l":"PowerShell","n":"ScarredMonk/PopulateActiveDirectory","s":43},{"d":"Utilize misconfigured DNS and old database records to find hidden IP's behind the CloudFlare network","l":"Python","n":"m0rtem/CloudFail","s":2697},{"d":"Accurately Locate Smartphones using Social Engineering ","l":"CSS","n":"thewhiteh4t/seeker","s":10359},{"d":"A list of useful payloads and bypass for Web Application Security and Pentest/CTF","l":"Python","n":"swisskyrepo/PayloadsAllTheThings","s":82958},{"d":"An HTTP toolkit for security research.","l":"Go","n":"dstotijn/hetty","s":12562},{"d":"PowerShell module to export a local copy of an Entra (Azure AD) tenant configuration.","l":"PowerShell","n":"microsoft/EntraExporter","s":890},{"d":"The first open-source DDoS protection system","l":"C","n":"AltraMayor/gatekeeper","s":1658},{"d":"A node js script to protect from ddos in Layer 7 under nginx","l":"JavaScript","n":"Anatik572/KeepSafe","s":28},{"d":"Exploit for CVE-2022-21999 - Windows Print Spooler Elevation of Privilege Vulnerability (LPE)","l":"C#","n":"ly4k/SpoolFool","s":793},{"d":"A curated list of awesome search engines useful during Penetration testing, Vulnerability assessments, Red/Blue Team operations, Bug Bounty and more","l":"Shell","n":"edoardottt/awesome-hacker-search-engines","s":11569},{"d":"Nuclei Templates Collection","l":"Python","n":"emadshanab/Nuclei-Templates-Collection","s":1224},{"d":"Community curated list of templates for the nuclei engine to find security vulnerabilities.","l":"JavaScript","n":"projectdiscovery/nuclei-templates","s":13417},{"d":"Simple extension that allows to run nuclei scanner directly from burp and transforms json results into the issues.","l":"Python","n":"dbrwsky/Nuclei-BurpExtension","s":118},{"d":"Windows x64 handcrafted token stealing kernel-mode shellcode","l":"Assembly","n":"winterknife/PINKPANTHER","s":516},{"d":"🖥️ P2P Remote Desktop - Portable peer-to-peer remote desktop with no installation required.","l":"C#","n":"miroslavpejic85/p2p","s":4101},{"d":"Gather and update all available and newest CVEs with their PoC.","l":"HTML","n":"trickest/cve","s":8251},{"d":"Multi-threaded URL enumeration/content-discovery tool in Python.","l":"Python","n":"0xTas/zenbuster","s":106},{"d":"An advanced tool for working with access tokens and Windows security policy.","l":"Pascal","n":"diversenok/TokenUniverse","s":673},{"d":"Unified ingress for developers","l":"Go","n":"inconshreveable/ngrok","s":24373},{"d":"Analyzing AD domains for security risks related to user accounts","l":"","n":"ST1LLY/dc-sonar","s":66},{"d":"Extract Windows Wi-Fi Passwords to Remote URL","l":"Python","n":"hmaverickadams/Windows-WiFi-Extractor","s":289},{"d":"BlueHound - pinpoint the security issues that actually matter","l":"TypeScript","n":"zeronetworks/BlueHound","s":787},{"d":"A Windows reverse shell payload generator and handler that abuses the http(s) protocol to establish a beacon-like reverse shell.","l":"Python","n":"t3l3machus/hoaxshell","s":3514},{"d":"This publication is a collection of various common attack scenarios on Microsoft Entra ID (formerly known as Azure Active Directory) and how they can be mitigated or detected.","l":"PowerShell","n":"Cloud-Architekt/AzureAD-Attack-Defense","s":2588},{"d":"Speculation control powershell script","l":"PowerShell","n":"microsoft/SpeculationControl","s":163},{"d":"SpecuCheck is a Windows utility for checking the state of the software mitigations and hardware against  CVE-2017-5754 (Meltdown), CVE-2017-5715 (Spectre v2), CVE-2018-3260 (Foreshadow), and CVE-2018-3639 (Spectre v4)","l":"C","n":"ionescu007/SpecuCheck","s":586},{"d":"","l":"C","n":"theori-io/CVE-2022-32250-exploit","s":193},{"d":"UAC bypass by abusing RPC and debug objects.","l":"C++","n":"Kudaes/Elevator","s":629},{"d":"Extract TLS session keys from running programs","l":"C++","n":"KJTsanaktsidis/tlskeydump","s":9},{"d":"A Tool for Domain Flyovers","l":"Go","n":"michenriksen/aquatone","s":5960},{"d":"Take a list of domains and probe for working HTTP and HTTPS servers","l":"Go","n":"tomnomnom/httprobe","s":3124},{"d":"Spider entire networks for juicy files sitting on SMB shares.  Search filenames or file content - regex supported!","l":"Python","n":"blacklanternsecurity/MANSPIDER","s":1447},{"d":"Teamsniper is a tool for fetching keywords in a Microsoft Teams such as (passwords, emails, database, etc.). ","l":"Python","n":"xRET2pwn/Teamsniper","s":200},{"d":"Real-time HTTP Intrusion Detection","l":"Go","n":"teler-sh/teler","s":3081},{"d":"KrbRelayUp - a universal no-fix local privilege escalation in windows domain environments where LDAP signing is not enforced (the default settings).","l":"C#","n":"Dec0ne/KrbRelayUp","s":1691},{"d":"A collection of Azure AD/Entra tools for offensive and defensive security purposes","l":"Python","n":"dirkjanm/ROADtools","s":2780},{"d":"linWinPwn is a bash script that streamlines the use of a number of Active Directory tools","l":"Shell","n":"lefayjey/linWinPwn","s":2239},{"d":"transform your payload into ipv4/ipv6/mac arrays ","l":"C","n":"NUL0x4C/HellShell","s":266},{"d":"using the gpu to hide your payload","l":"C","n":"NUL0x4C/GP","s":67},{"d":"A python tool to automate KeePass discovery and secret extraction.","l":"Python","n":"Orange-Cyberdefense/KeePwn","s":531},{"d":"Advanced PHP deobfuscator","l":"PHP","n":"simon816/PHPDeobfuscator","s":136},{"d":"An updated drop-in for statping. A Status Page for monitoring your websites and applications with beautiful graphs, analytics, and plugins. Run on any type of environment.","l":"Go","n":"statping-ng/statping-ng","s":1994},{"d":"Status Page for monitoring your websites and applications with beautiful graphs, analytics, and plugins. Run on any type of environment.","l":"Vue","n":"statping/statping","s":7293},{"d":"A tool that allows you to create vulnerable instrumented local or cloud environments to simulate attacks against and collect the data into Splunk ","l":"Python","n":"splunk/attack_range","s":2586},{"d":"","l":"","n":"cursor/cursor","s":33362},{"d":"Planning To Take Certified Ethical Hacker (CEH)?  Here are github repo with 125 questions and answers to help you prep for the test","l":"","n":"ryh04x/CEH-Exam-Questions","s":1144},{"d":"Purpleteam scripts simulation & Detection - trigger events for SOC detections","l":"PowerShell","n":"mthcht/Purpleteam","s":208},{"d":"One place for all the default credentials to assist the Blue/Red teamers identifying devices with default password 🛡️","l":"Python","n":"ihebski/DefaultCreds-cheat-sheet","s":6844},{"d":"List of libraries, tools and APIs for web scraping and data processing.","l":"JavaScript","n":"lorien/awesome-web-scraping","s":8249},{"d":"With this script you can bypass both root detection and ssl pinning for your android app.","l":"","n":"CrackerCat/frida_rootandsslbypass","s":2},{"d":"React components to build charts and dashboards","l":"TypeScript","n":"tremorlabs/tremor-npm","s":16460},{"d":"It's React, but in Python","l":"Python","n":"reactive-python/reactpy","s":8149},{"d":"Securely and quickly copy data from source to target.","l":"C","n":"eeertekin/bbcp","s":260},{"d":"DedSec GRUB Theme  💀🖤","l":"Python","n":"VandalByte/dedsec-grub2-theme","s":559},{"d":"Arsenal is just a quick inventory and launcher for hacking programs","l":"Python","n":"Orange-Cyberdefense/arsenal","s":3827},{"d":"Totally Automatic LFI Exploiter (+ Reverse Shell) and Scanner ","l":"Python","n":"D35m0nd142/LFISuite","s":1974},{"d":"Encodes a PowerShell script in the pixels of a PNG file and generates a oneliner to execute","l":"PowerShell","n":"peewpw/Invoke-PSImage","s":2187},{"d":"A super simple asynchronous multithreaded proxy scraper; scraping & checking ~500k HTTP, HTTPS, SOCKS4, & SOCKS5 proxies.","l":"Python","n":"0xSolanaceae/proXXy","s":158},{"d":"SoTA LLM for converting natural language questions to SQL queries","l":"Jupyter Notebook","n":"defog-ai/sqlcoder","s":4046},{"d":"NucleiFuzzer is a robust automation tool that efficiently detects web application vulnerabilities, including XSS, SQLi, SSRF, and Open Redirects, leveraging advanced scanning and URL enumeration techniques","l":"Python","n":"0xKayala/NucleiFuzzer","s":2011},{"d":"reverse shell using curl","l":"Python","n":"irsl/curlshell","s":480},{"d":"apk.py makes reverse engineering Android apps easier, automating some repetitive tasks like pulling, decoding, rebuilding and patching an APK.","l":"Python","n":"81U380X/apk.py","s":14},{"d":"Asahi Linux installer","l":"Python","n":"AsahiLinux/asahi-installer","s":961},{"d":"PHP-FPM script that makes recommendations on max_children","l":"Shell","n":"pksteyn/php-fpmpal","s":59},{"d":"PHP-FPM status monitoring template for Zabbix with auto discovery (LLD), support for multiple pools and ISPConfig","l":"Shell","n":"rvalitov/zabbix-php-fpm","s":73},{"d":"Exploit code for CVE-2021-1961","l":"C","n":"tamirzb/CVE-2021-1961","s":121},{"d":"Dominate Active Directory with PowerShell. ","l":"PowerShell","n":"The-Viper-One/PsMapExec","s":1214},{"d":"A collection of CTF write-ups, pentesting topics, guides and notes. Notes compiled from multiple sources and my own lab research. Topics also support OSCP, Active Directory, CRTE, eJPT and eCPPT.","l":"","n":"The-Viper-One/Pentest-Everything","s":644},{"d":":snake: A toolkit for testing, tweaking and cracking JSON Web Tokens","l":"Python","n":"ticarpi/jwt_tool","s":6829},{"d":"Jan is an open source alternative to ChatGPT that runs 100% offline on your computer.","l":"Rust","n":"janhq/jan","s":46155},{"d":"macOS and Linux VMs on Apple Silicon to use in CI and other automations","l":"Swift","n":"openai/tart","s":8027},{"d":"A self-hosted BitTorrent indexer, DHT crawler, content classifier and torrent search engine with web UI, GraphQL API and Servarr stack integration.","l":"Go","n":"bitmagnet-io/bitmagnet","s":4477},{"d":"Mantis is a security framework that automates the workflow of discovery, reconnaissance, and vulnerability scanning.","l":"Python","n":"PhonePe/mantis","s":1044},{"d":"Fast, secure, efficient backup program","l":"Go","n":"restic/restic","s":37461},{"d":"PowerHuntShares is an audit script designed in inventory, analyze, and report excessive privileges configured on Active Directory domains.","l":"PowerShell","n":"NetSPI/PowerHuntShares","s":1080},{"d":"Tunnel TCP connections through a file","l":"C#","n":"fiddyschmitt/File-Tunnel","s":1133},{"d":"Python3 script to quickly get various information from a domain controller through his LDAP service.","l":"Python","n":"yaap7/ldapsearch-ad","s":354},{"d":"tomcat CVE-2024-50379/CVE-2024-56337 条件竞争文件上传exp","l":"Go","n":"SleepingBag945/CVE-2024-50379","s":85},{"d":"Debug, evaluate, and monitor your LLM applications, RAG systems, and agentic workflows with comprehensive tracing, automated evaluations, and production-ready dashboards.","l":"Java","n":"comet-ml/opik","s":23518},{"d":"all of the workflows of n8n i could find (also from the site itself)","l":"Python","n":"Zie619/n8n-workflows","s":57321},{"d":"The personal finance app for everyone","l":"Ruby","n":"maybe-finance/maybe","s":54184},{"d":"HexStrike AI MCP Agents is an advanced MCP server that lets AI agents (Claude, GPT, Copilot, etc.) autonomously run 150+ cybersecurity tools for automated pentesting, vulnerability discovery, bug bounty automation, and security research. Seamlessly bridge LLMs with real-world offensive security capabilities.","l":"Python","n":"0x4m4/hexstrike-ai","s":13921},{"d":"CheckCle is a self-hosted, open-source monitoring platform for seamless, real-time full-stack systems, applications, and infrastructure. It provides real-time uptime monitoring, distributed checks, incident tracking, and alerts. All deployable anywhere.","l":"Go","n":"operacle/checkcle","s":3330},{"d":"HexStrike AI MCP Agents is an advanced MCP server that lets AI agents (Claude, GPT, Copilot, etc.) autonomously run 150+ cybersecurity tools for automated pentesting, vulnerability discovery, bug bounty automation, and security research. Seamlessly bridge LLMs with real-world offensive security capabilities.","l":"Python","n":"CrackerCat/hexstrike-ai","s":3},{"d":"Customizable Linux Persistence Tool for Security Research and Detection Engineering.","l":"Shell","n":"Aegrah/PANIX","s":902},{"d":"Beautiful, Modern & Opinionated Linux","l":"Shell","n":"omacom/omarchy","s":47619},{"d":"A modular vulnerability scanner with automatic report generation capabilities.","l":"Python","n":"CERT-Polska/Artemis","s":1265},{"d":"Glamourous agentic coding for all 💘","l":"Go","n":"charmbracelet/crush","s":29208},{"d":"Netronome is a modern network speed testing and monitoring tool built with Go and React.","l":"Go","n":"autobrr/netronome","s":1459},{"d":"Proxy that exposes Antigravity provided claude / gemini models, so we can use them in Claude Code and OpenClaw (Clawdbot)","l":"JavaScript","n":"badrisnarayanan/antigravity-claude-proxy","s":4097},{"d":"Professional Antigravity Account Manager & Switcher. One-click seamless account switching for Antigravity Tools. Built with Tauri v2 + React (Rust).专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。","l":"Rust","n":"lbjlaq/Antigravity-Manager","s":34081},{"d":"Modern Docker Management, Designed for Everyone","l":"Go","n":"getarcaneapp/arcane","s":10500},{"d":"Stealth browser automation for AI agents over MCP and the Chrome DevTools Protocol: navigation, network hooks, DOM extraction, and pixel-accurate UI cloning.","l":"Python","n":"vibheksoni/stealth-browser-mcp","s":3389},{"d":"Connect like there is no firewall. Securely.","l":"C","n":"hackerschoice/gsocket","s":1990},{"d":"AI-Powered Reverse Engineering Plugin for IDA Pro","l":"Python","n":"symgraph/IDAssist","s":910},{"d":"A modern replacement for Redis and Memcached","l":"C++","n":"dragonflydb/dragonfly","s":31939},{"d":"A shell for wayland compositors","l":"QML","n":"ilyamiro/serpantinum","s":7807},{"d":"A True Instrumentable Binary Emulation Framework","l":"Python","n":"qilingframework/qiling","s":6205},{"d":"Hundreds of models & providers. One command to find what runs on your hardware.","l":"Rust","n":"AlexsJones/llmfit","s":39325},{"d":"Native web workspace for Hermes Agent — chat, terminal, memory, skills, inspector.","l":"JavaScript","n":"outsourc-e/hermes-workspace","s":6848},{"d":"Web UI consciousness monitor for Hermes — the AI agent with persistent memory","l":"Python","n":"joeynyc/hermes-hudui","s":1866},{"d":"The safest, simplest way to manage Hermes from your Mac. Pure SSH. No gateways, no exposed ports, no browser layer.","l":"Swift","n":"dodo-reach/hermes-desktop","s":2037},{"d":"Autonomous multi-session AI coding","l":"TypeScript","n":"AndyMik90/Aperant","s":14632},{"d":"Leantime is a goals focused project management system for non-project managers. Building with ADHD, Autism, and dyslexia in mind.","l":"PHP","n":"Leantime/leantime","s":12150},{"d":"Documentation and reverse engineering of reCAPTCHA","l":"","n":"CrackerCat/elyelysiox-recaptcha","s":2},{"d":"The fastest browser for AI agents to run browser automation, built for sharing your logged-in browser state with your AI agents, like Codex or Claude Code, without disturbing you. Zero cost, zero config.","l":"JavaScript","n":"citrolabs/ego-lite","s":24557}]}</script><!-- /snapshot -->
 
 <script>
 /* ---------- Edit me ---------- */
@@ -381,204 +441,470 @@ const CONFIG = {
   handle: "cliy0-2",
   email: "",           // shown as plain selectable text when set
   linkedin: "",        // full URL
-  location: "",        // e.g. "Paris area"
-  missions: []         // { title, client, period, text, tags: [] } added later
+  location: { en: "", fr: "" },   // e.g. { en: "Paris area", fr: "Région parisienne" }
+  missions: []         // { title: {en, fr}, period: "2023–2024", client: {en, fr}, text: {en, fr} }
+};
+
+/* ---------- Copy (EN / FR) ---------- */
+const UI = {
+  en: {
+    viewAs: "View as", roleBtn: { security: "Security", engineering: "Engineering", everything: "Everything" },
+    status: "Open to on-site and hybrid roles",
+    headline: "I read logs for the <em>one line</em> that doesn't add up.",
+    btnWork: "Selected work", btnContact: "Roles I'm looking for",
+    strEyebrow: "Strengths", strTitle: "Where I'm strongest",
+    strDesc: "Ordered for the view you picked. The counts under each area come from the open-source tools I follow on GitHub, so they update with it.",
+    primary: "primary", toolsIn: n => `${n} tool${n === 1 ? "" : "s"} followed in this area`,
+    workEyebrow: "Selected work", workTitle: "Things I built and took apart",
+    workDesc: "Most of this lives in private repositories. I'm happy to walk through any of it in an interview.",
+    actEyebrow: "GitHub activity", actTitle: "What the commit log says",
+    actDesc: "Commits across all my repositories over the last 26 weeks, private ones included. Only the counts are published.",
+    statCommits: "commits · 26 weeks", statDays: "active days", statRepos: p => `repositories (${p} private)`,
+    less: "Less", more: "More", commitsOn: (d, c) => `${d}: ${c} commit${c === 1 ? "" : "s"}`,
+    langTitle: "Languages in my repositories", langNote: "Number of repositories that use each language.",
+    toolEyebrow: "Toolbox", toolTitle: "The tools I study and use",
+    toolDesc: "Pulled from the repositories I star on GitHub and sorted by area.",
+    live: "Live from GitHub", snapshot: d => `Snapshot from ${d}`,
+    search: n => `Search ${n} tools`, noMatch: q => `No tool matches “${q}”.`,
+    allStars: n => `See all ${n} starred repositories on GitHub`,
+    bgEyebrow: "Background", bgTitle: "How I got here",
+    ctEyebrow: "Contact", ctTitle: "Let's talk about your team",
+    ctDesc: "I'm looking to move from remote freelance back to an on-site team. If your SOC, security or platform team needs someone who can read the logs and the binary, get in touch.",
+    targetsTitle: "Roles I'm looking for", copyEmail: "Copy email", copied: "Copied",
+    footBuilt: "Built from my GitHub with a small sync script.",
+    foot: (live, d, n, p) => `GitHub data ${live ? "live" : "as of " + d} · ${n} starred · last push ${p}`,
+    showRule: "Show the detection rule", hideRule: "Hide the rule",
+    showHealth: "Show the healthcheck", hideHealth: "Hide it",
+    panelNote: { security: "Sample telemetry, written for this page. The rule behind the button catches the highlighted line.", engineering: "Sample run, written for this page." }
+  },
+  fr: {
+    viewAs: "Vue", roleBtn: { security: "Sécurité", engineering: "Ingénierie", everything: "Tout" },
+    status: "Disponible pour un poste sur site ou hybride",
+    headline: "Je lis les logs pour trouver <em>la ligne</em> qui cloche.",
+    btnWork: "Réalisations", btnContact: "Postes visés",
+    strEyebrow: "Points forts", strTitle: "Là où je suis le plus solide",
+    strDesc: "Classés selon la vue choisie. Les chiffres sous chaque domaine viennent des outils open source que je suis sur GitHub, et se mettent à jour avec.",
+    primary: "principal", toolsIn: n => `${n} outil${n > 1 ? "s" : ""} suivi${n > 1 ? "s" : ""} dans ce domaine`,
+    workEyebrow: "Réalisations", workTitle: "Ce que j'ai construit et démonté",
+    workDesc: "L'essentiel est dans des dépôts privés. Je présente volontiers n'importe lequel en entretien.",
+    actEyebrow: "Activité GitHub", actTitle: "Ce que dit l'historique des commits",
+    actDesc: "Commits sur tous mes dépôts depuis 26 semaines, privés compris. Seuls les totaux sont publiés.",
+    statCommits: "commits · 26 semaines", statDays: "jours actifs", statRepos: p => `dépôts (${p} privés)`,
+    less: "Moins", more: "Plus", commitsOn: (d, c) => `${d} : ${c} commit${c > 1 ? "s" : ""}`,
+    langTitle: "Langages de mes dépôts", langNote: "Nombre de dépôts qui utilisent chaque langage.",
+    toolEyebrow: "Boîte à outils", toolTitle: "Les outils que j'étudie et utilise",
+    toolDesc: "Tirés des dépôts que je suis sur GitHub, classés par domaine.",
+    live: "En direct de GitHub", snapshot: d => `Instantané du ${d}`,
+    search: n => `Chercher parmi ${n} outils`, noMatch: q => `Aucun outil ne correspond à « ${q} ».`,
+    allStars: n => `Voir les ${n} dépôts suivis sur GitHub`,
+    bgEyebrow: "Parcours", bgTitle: "D'où je viens",
+    ctEyebrow: "Contact", ctTitle: "Parlons de votre équipe",
+    ctDesc: "Après plusieurs années de freelance à distance, je cherche à rejoindre une équipe sur site. Si votre SOC, votre équipe sécurité ou plateforme a besoin de quelqu'un qui lit les logs comme les binaires, écrivez-moi.",
+    targetsTitle: "Postes visés", copyEmail: "Copier l'email", copied: "Copié",
+    footBuilt: "Généré à partir de mon GitHub par un petit script de synchro.",
+    foot: (live, d, n, p) => `Données GitHub ${live ? "en direct" : "au " + d} · ${n} dépôts suivis · dernier push le ${p}`,
+    showRule: "Voir la règle de détection", hideRule: "Masquer la règle",
+    showHealth: "Voir le healthcheck", hideHealth: "Masquer",
+    panelNote: { security: "Télémétrie d'exemple, écrite pour cette page. La règle derrière le bouton attrape la ligne surlignée.", engineering: "Exécution d'exemple, écrite pour cette page." }
+  }
 };
 
 const ROLES = {
   security: {
-    title: "Detection & SOC engineer",
-    lede: "I turn raw telemetry into detections that hold up. Triage, threat hunting and incident response by day, reverse engineering on the side to see how defenses really fail.",
+    title: { en: "Detection & SOC engineer", fr: "Ingénieur détection & SOC" },
+    lede: {
+      en: "I turn raw telemetry into detections that hold up. Triage, threat hunting and incident response by day, reverse engineering on the side to see how defenses really fail.",
+      fr: "Je transforme la télémétrie brute en détections qui tiennent. Triage, threat hunting et réponse à incident au quotidien, reverse engineering à côté pour voir comment les défenses cèdent vraiment."
+    },
     order: ["detection", "offensive", "re", "infra", "ai", "dev"],
+    targets: {
+      en: ["Detection engineer", "SOC analyst, L2/L3", "Threat hunter", "Malware analyst / reverse engineer", "Purple team"],
+      fr: ["Ingénieur détection", "Analyste SOC N2/N3", "Threat hunter", "Analyste malware / reverse engineer", "Purple team"]
+    },
     panel: "security"
   },
   engineering: {
-    title: "Systems & full-stack engineer",
-    lede: "I build and run the whole stack: containerized APIs, admin frontends, Android apps and the Linux servers under them, with security designed in from the start.",
+    title: { en: "Systems & full-stack engineer", fr: "Ingénieur systèmes & full-stack" },
+    lede: {
+      en: "I build and run the whole stack: containerized APIs, admin frontends, Android apps and the Linux servers under them, with security designed in from the start.",
+      fr: "Je construis et j'exploite toute la pile : API conteneurisées, interfaces d'administration, applications Android et les serveurs Linux en dessous, avec la sécurité pensée dès le départ."
+    },
     order: ["dev", "infra", "ai", "re", "detection", "offensive"],
+    targets: {
+      en: ["DevSecOps engineer", "Platform / infrastructure engineer", "Backend developer (TypeScript, PHP)", "Android developer"],
+      fr: ["Ingénieur DevSecOps", "Ingénieur plateforme / infrastructure", "Développeur backend (TypeScript, PHP)", "Développeur Android"]
+    },
     panel: "engineering"
   },
   everything: {
-    title: "Security engineer who ships code",
-    lede: "Years of remote freelance across systems administration, security and development. The habit is the same everywhere: take the system apart, find where trust sits, then make it hold.",
+    title: { en: "Security engineer who ships code", fr: "Ingénieur sécurité qui livre du code" },
+    lede: {
+      en: "Years of remote freelance across systems administration, security and development. The habit is the same everywhere: take the system apart, find where trust sits, then make it hold.",
+      fr: "Plusieurs années de freelance à distance entre administration système, sécurité et développement. Le réflexe est le même partout : démonter le système, trouver où se place la confiance, puis le rendre solide."
+    },
     order: ["detection", "re", "infra", "dev", "offensive", "ai"],
+    targets: {
+      en: ["Detection engineer", "DevSecOps engineer", "SOC analyst, L2/L3", "Malware analyst / reverse engineer"],
+      fr: ["Ingénieur détection", "Ingénieur DevSecOps", "Analyste SOC N2/N3", "Analyste malware / reverse engineer"]
+    },
     panel: "security"
   }
 };
 
 const STRENGTHS = {
   detection: {
-    title: "Detection engineering & SOC",
-    points: [
-      "Alert triage that ends in a clear story: what happened, how far it went, what to do next",
-      "Writing and tuning detection rules mapped to MITRE ATT&CK, cutting noise without losing signal",
-      "Hypothesis-driven threat hunting across endpoint, network and identity data",
-      "Incident response support: scoping, timelines, containment advice, clean write-ups",
-      "Python tooling to enrich alerts and query the SIEM"
-    ],
-    stack: "Elasticsearch · Kibana · Sysmon · Splunk · Wireshark"
+    title: { en: "Detection engineering & SOC", fr: "Ingénierie de détection & SOC" },
+    points: {
+      en: [
+        "Alert triage that ends in a clear story: what happened, how far it went, what to do next",
+        "Writing and tuning detection rules mapped to MITRE ATT&CK, cutting noise without losing signal",
+        "Hypothesis-driven threat hunting across endpoint, network and identity data",
+        "Incident response support: scoping, timelines, containment advice, clean write-ups",
+        "Python tooling to enrich alerts and query the SIEM"
+      ],
+      fr: [
+        "Un triage qui aboutit à un récit clair : ce qui s'est passé, jusqu'où, que faire ensuite",
+        "Écriture et réglage de règles de détection alignées sur MITRE ATT&CK, moins de bruit sans perdre le signal",
+        "Threat hunting par hypothèses sur les données endpoint, réseau et identité",
+        "Appui à la réponse à incident : périmètre, chronologie, recommandations de confinement, rapports clairs",
+        "Outillage Python pour enrichir les alertes et interroger le SIEM"
+      ]
+    },
+    stack: "Elasticsearch · Kibana · Sysmon · Sigma · Splunk · Wireshark"
   },
   offensive: {
-    title: "Attacker knowledge for defense",
-    points: [
-      "Active Directory and Entra ID attack paths: Kerberos, LDAP, ACL abuse, password spraying",
-      "Windows and Linux privilege escalation techniques",
-      "Recon and web vulnerability scanning with the nuclei ecosystem",
-      "I study offensive tooling to know exactly what my detections need to catch"
-    ],
-    stack: "BloodHound-style graphing · PEASS · nuclei · AD labs (GOAD)"
+    title: { en: "Attacker knowledge for defense", fr: "Connaître l'attaque pour défendre" },
+    points: {
+      en: [
+        "Active Directory and Entra ID attack paths: Kerberos, LDAP, ACL abuse, password spraying",
+        "Windows and Linux privilege escalation techniques",
+        "Recon and web vulnerability scanning with the nuclei ecosystem",
+        "I study offensive tooling to know exactly what my detections need to catch"
+      ],
+      fr: [
+        "Chemins d'attaque Active Directory et Entra ID : Kerberos, LDAP, abus d'ACL, password spraying",
+        "Techniques d'élévation de privilèges Windows et Linux",
+        "Reconnaissance et scan de vulnérabilités web avec l'écosystème nuclei",
+        "J'étudie les outils offensifs pour savoir exactement ce que mes détections doivent attraper"
+      ]
+    },
+    stack: { en: "BloodHound-style graphing · PEASS · nuclei · AD labs (GOAD)", fr: "Graphes type BloodHound · PEASS · nuclei · labs AD (GOAD)" }
   },
   re: {
-    title: "Reverse engineering & low-level analysis",
-    points: [
-      "Static and dynamic analysis of x86-64 and ARM64 binaries",
-      "Obfuscation, anti-debug and anti-tamper: finding where the checks are and how they hold",
-      "Hardware breakpoints through debug registers when software breakpoints get detected",
-      "White-box cryptography and reconstructing undocumented binary formats",
-      "AI-assisted workflow: Ghidra and IDA driven by agents over MCP, every finding verified by hand"
-    ],
+    title: { en: "Reverse engineering & low-level analysis", fr: "Reverse engineering & analyse bas niveau" },
+    points: {
+      en: [
+        "Static and dynamic analysis of x86-64 and ARM64 binaries",
+        "Obfuscation, anti-debug and anti-tamper: finding where the checks are and how they hold",
+        "Hardware breakpoints through debug registers when software breakpoints get detected",
+        "White-box cryptography and reconstructing undocumented binary formats",
+        "AI-assisted workflow: Ghidra and IDA driven by agents over MCP, every finding verified by hand"
+      ],
+      fr: [
+        "Analyse statique et dynamique de binaires x86-64 et ARM64",
+        "Obfuscation, anti-debug et anti-tamper : trouver où sont les contrôles et comment ils tiennent",
+        "Breakpoints matériels via les registres de debug quand les breakpoints logiciels sont détectés",
+        "Cryptographie white-box et reconstruction de formats binaires non documentés",
+        "Workflow assisté par IA : Ghidra et IDA pilotés par des agents via MCP, chaque résultat vérifié à la main"
+      ]
+    },
     stack: "GDB · Frida · Ghidra · IDA · Python · C"
   },
   infra: {
-    title: "Systems & infrastructure",
-    points: [
-      "Linux server administration on Ubuntu and Debian",
-      "Multi-service Docker Compose stacks with health checks and migrations on boot",
-      "nginx and Caddy reverse proxies, TLS, PHP-FPM tuning",
-      "PostgreSQL, Redis-compatible caches, supervisord and systemd services",
-      "Deployment, backup and disaster-recovery runbooks"
-    ],
+    title: { en: "Systems & infrastructure", fr: "Systèmes & infrastructure" },
+    points: {
+      en: [
+        "Linux server administration on Ubuntu and Debian",
+        "Multi-service Docker Compose stacks with health checks and migrations on boot",
+        "nginx and Caddy reverse proxies, TLS, PHP-FPM tuning",
+        "PostgreSQL, Redis-compatible caches, supervisord and systemd services",
+        "Deployment, backup and disaster-recovery runbooks"
+      ],
+      fr: [
+        "Administration de serveurs Linux Ubuntu et Debian",
+        "Stacks Docker Compose multi-services avec healthchecks et migrations au démarrage",
+        "Reverse proxies nginx et Caddy, TLS, réglage de PHP-FPM",
+        "PostgreSQL, caches compatibles Redis, services supervisord et systemd",
+        "Procédures de déploiement, de sauvegarde et de reprise après sinistre"
+      ]
+    },
     stack: "Docker · nginx · Caddy · PostgreSQL · Dragonfly · systemd"
   },
   dev: {
-    title: "Full-stack & mobile development",
-    points: [
-      "TypeScript and Node.js APIs (Fastify), PHP 8.4 (Spiral, RoadRunner)",
-      "Vue 3 single-page apps with Vite, Tailwind and PrimeVue",
-      "Native Android TV in Kotlin with Jetpack Compose and Media3",
-      "Security built in: JWT with refresh, rate limiting, AES-256-GCM encryption at rest",
-      "Python libraries and automation scripts"
-    ],
+    title: { en: "Full-stack & mobile development", fr: "Développement full-stack & mobile" },
+    points: {
+      en: [
+        "TypeScript and Node.js APIs (Fastify), PHP 8.4 (Spiral, RoadRunner)",
+        "Vue 3 single-page apps with Vite, Tailwind and PrimeVue",
+        "Native Android TV in Kotlin with Jetpack Compose and Media3",
+        "Security built in: JWT with refresh, rate limiting, AES-256-GCM encryption at rest",
+        "Python libraries and automation scripts"
+      ],
+      fr: [
+        "API TypeScript et Node.js (Fastify), PHP 8.4 (Spiral, RoadRunner)",
+        "Applications Vue 3 avec Vite, Tailwind et PrimeVue",
+        "Android TV natif en Kotlin avec Jetpack Compose et Media3",
+        "Sécurité intégrée : JWT avec refresh, rate limiting, chiffrement AES-256-GCM au repos",
+        "Bibliothèques Python et scripts d'automatisation"
+      ]
+    },
     stack: "TypeScript · PHP · Vue · Kotlin · Python"
   },
   ai: {
-    title: "AI-augmented workflows",
-    points: [
-      "LLM agents wired to real tools through MCP servers, for analysis and for coding",
-      "Faster triage and summaries with a human always checking the output",
-      "Self-hosted and local models when data must not leave the machine"
-    ],
-    stack: "MCP · Claude Code · n8n · local LLMs"
+    title: { en: "AI-augmented workflows", fr: "Workflows augmentés par l'IA" },
+    points: {
+      en: [
+        "LLM agents wired to real tools through MCP servers, for analysis and for coding",
+        "Faster triage and summaries, with a human always checking the output",
+        "Self-hosted and local models when data must not leave the machine"
+      ],
+      fr: [
+        "Agents LLM branchés sur de vrais outils via des serveurs MCP, pour l'analyse comme pour le code",
+        "Triage et synthèses plus rapides, toujours relus par un humain",
+        "Modèles auto-hébergés et locaux quand les données ne doivent pas sortir de la machine"
+      ]
+    },
+    stack: { en: "MCP · Claude Code · n8n · local LLMs", fr: "MCP · Claude Code · n8n · LLM locaux" }
   }
 };
 
 const PROJECTS = [
   {
     id: "re-lab", roles: { security: 1, everything: 2, engineering: 5 },
-    kind: "Reverse engineering", title: "Bytecode format reconstruction",
-    text: "Rebuilt a parser for an undocumented compiled-code container format by walking it byte by byte, then turned the output back into readable source.",
-    figure: ["3,336 / 3,336", "containers decoded"],
-    bullets: [
-      "Nine parser fixes, zero regressions, each one guarded by a plausibility probe",
-      "Neutralized anti-debug checks and traced key derivation (HKDF, AES-256-CBC, HMAC-SHA256) with hardware breakpoints",
-      "Mapped signature checks across interpreted code and a stripped Go binary"
-    ],
+    kind: "Reverse engineering",
+    title: { en: "Bytecode format reconstruction", fr: "Reconstruction d'un format de bytecode" },
+    text: {
+      en: "Rebuilt a parser for an undocumented compiled-code container format by walking it byte by byte, then turned the output back into readable source.",
+      fr: "Reconstruction du parseur d'un format de conteneur de code compilé non documenté, octet par octet, puis retour à un code source lisible."
+    },
+    figure: { en: ["3,336 / 3,336", "containers decoded"], fr: ["3 336 / 3 336", "conteneurs décodés"] },
+    bullets: {
+      en: [
+        "Nine parser fixes, zero regressions, each one guarded by a plausibility probe",
+        "Neutralized anti-debug checks and traced key derivation (HKDF, AES-256-CBC, HMAC-SHA256) with hardware breakpoints",
+        "Mapped signature checks across interpreted code and a stripped Go binary"
+      ],
+      fr: [
+        "Neuf correctifs du parseur, zéro régression, chacun protégé par une sonde de plausibilité",
+        "Neutralisation des contrôles anti-debug et traçage de la dérivation de clés (HKDF, AES-256-CBC, HMAC-SHA256) par breakpoints matériels",
+        "Cartographie des vérifications de signature entre code interprété et binaire Go strippé"
+      ]
+    },
     tags: ["Python", "C", "GDB", "x86-64"],
-    access: "Private research · walkthrough on request"
+    access: { en: "Private research · walkthrough on request", fr: "Recherche privée · démonstration sur demande" }
   },
   {
     id: "platform", roles: { engineering: 1, everything: 1, security: 3 },
-    kind: "Full-stack platform", title: "Containerized admin platform",
-    text: "A multi-service platform with a public API, an admin API, background jobs and a real-time dashboard, deployed with one compose file behind Caddy.",
-    bullets: [
-      "JWT with automatic refresh, rate limiting that answers HTTP 429 past quota",
-      "Source health checks with latency scoring, scheduled cleanup of stale connections",
-      "Validated end to end: migrations, vue-tsc and Vite build, php -l on PHP 8.4, API smoke tests",
-      "Deployment and disaster-recovery runbooks"
-    ],
+    kind: { en: "Full-stack platform", fr: "Plateforme full-stack" },
+    title: { en: "Containerized admin platform", fr: "Plateforme d'administration conteneurisée" },
+    text: {
+      en: "A multi-service platform with a public API, an admin API, background jobs and a real-time dashboard, deployed with one compose file behind Caddy.",
+      fr: "Une plateforme multi-services avec API publique, API d'administration, tâches de fond et tableau de bord temps réel, déployée en un seul fichier compose derrière Caddy."
+    },
+    bullets: {
+      en: [
+        "JWT with automatic refresh, rate limiting that answers HTTP 429 past quota",
+        "Source health checks with latency scoring, scheduled cleanup of stale connections",
+        "Validated end to end: migrations, vue-tsc and Vite build, php -l on PHP 8.4, API smoke tests",
+        "Deployment and disaster-recovery runbooks"
+      ],
+      fr: [
+        "JWT avec refresh automatique, rate limiting qui répond HTTP 429 au-delà du quota",
+        "Healthchecks des sources avec score de latence, nettoyage planifié des connexions mortes",
+        "Validée de bout en bout : migrations, build vue-tsc et Vite, php -l sous PHP 8.4, smoke tests de l'API",
+        "Procédures de déploiement et de reprise après sinistre"
+      ]
+    },
     tags: ["Vue 3", "PHP 8.4", "Spiral", "RoadRunner", "PostgreSQL 16", "Docker"],
-    access: "Private repository · walkthrough on request"
+    access: { en: "Private repository · walkthrough on request", fr: "Dépôt privé · démonstration sur demande" }
   },
   {
     id: "tv-app", roles: { engineering: 2, everything: 3, security: 5 },
-    kind: "Android", title: "Android TV media app",
-    text: "A native 10-foot app for Android TV, Google TV and Fire TV, designed for the remote first.",
-    figure: ["100+", "commits"],
-    bullets: [
-      "HLS and DASH playback on Media3, hardware decoding for HEVC, AV1 and HDR",
-      "Credentials encrypted with AES-256-GCM through the Android Keystore",
-      "Phone-to-TV setup by QR code, up to six profiles, PIN-protected kids mode"
-    ],
+    kind: "Android",
+    title: { en: "Android TV media app", fr: "Application média Android TV" },
+    text: {
+      en: "A native app for Android TV, Google TV and Fire TV, designed for the remote first.",
+      fr: "Une application native pour Android TV, Google TV et Fire TV, pensée d'abord pour la télécommande."
+    },
+    figure: { en: ["100+", "commits"], fr: ["100+", "commits"] },
+    bullets: {
+      en: [
+        "HLS and DASH playback on Media3, hardware decoding for HEVC, AV1 and HDR",
+        "Credentials encrypted with AES-256-GCM through the Android Keystore",
+        "Phone-to-TV setup by QR code, up to six profiles, PIN-protected kids mode"
+      ],
+      fr: [
+        "Lecture HLS et DASH avec Media3, décodage matériel HEVC, AV1 et HDR",
+        "Identifiants chiffrés en AES-256-GCM via l'Android Keystore",
+        "Configuration du téléphone vers la TV par QR code, jusqu'à six profils, mode enfants protégé par PIN"
+      ]
+    },
     tags: ["Kotlin", "Jetpack Compose", "Media3"],
-    access: "Private repository · APK on request"
+    access: { en: "Private repository · APK on request", fr: "Dépôt privé · APK sur demande" }
   },
   {
     id: "api", roles: { engineering: 3, everything: 4, security: 2 },
-    kind: "Backend", title: "Encrypted API service",
-    text: "A Node.js API that stores third-party credentials for its users and never keeps them in clear text.",
-    bullets: [
-      "Credentials encrypted at rest with AES-256-GCM before they reach the database",
-      "JWT sessions, consistent success/error envelope on every route",
-      "Security monitoring notes and a documented backup procedure"
-    ],
+    kind: "Backend",
+    title: { en: "Encrypted API service", fr: "Service API chiffré" },
+    text: {
+      en: "A Node.js API that stores third-party credentials for its users and never keeps them in clear text.",
+      fr: "Une API Node.js qui stocke des identifiants tiers pour ses utilisateurs sans jamais les garder en clair."
+    },
+    bullets: {
+      en: [
+        "Credentials encrypted at rest with AES-256-GCM before they reach the database",
+        "JWT sessions, the same success/error envelope on every route",
+        "Security monitoring notes and a documented backup procedure"
+      ],
+      fr: [
+        "Identifiants chiffrés au repos en AES-256-GCM avant d'atteindre la base",
+        "Sessions JWT, la même enveloppe succès/erreur sur chaque route",
+        "Notes de supervision sécurité et procédure de sauvegarde documentée"
+      ]
+    },
     tags: ["Node.js 22", "TypeScript", "Fastify", "PostgreSQL", "Docker"],
-    access: "Private repository · walkthrough on request"
+    access: { en: "Private repository · walkthrough on request", fr: "Dépôt privé · démonstration sur demande" }
   },
   {
     id: "allocine", roles: { engineering: 4, everything: 5, security: 4 },
-    kind: "Python library", title: "allocine.py",
-    text: "A Python wrapper for a film database site that has no public API. It reads what the site already serves: server-rendered HTML and embedded schema.org JSON-LD.",
-    bullets: [
-      "Search, film, series and person records with press and audience ratings",
-      "No API key, no signing; falls back to the standard library when requests is missing"
-    ],
+    kind: { en: "Python library", fr: "Bibliothèque Python" },
+    title: "allocine.py",
+    text: {
+      en: "A Python wrapper for a film database site that has no public API. It reads what the site already serves: server-rendered HTML and embedded schema.org JSON-LD.",
+      fr: "Un wrapper Python pour un site de cinéma sans API publique. Il lit ce que le site sert déjà : du HTML rendu côté serveur et du JSON-LD schema.org embarqué."
+    },
+    bullets: {
+      en: [
+        "Search, film, series and person records with press and audience ratings",
+        "No API key, no signing; falls back to the standard library when requests is missing"
+      ],
+      fr: [
+        "Recherche, fiches films, séries et personnes avec notes presse et spectateurs",
+        "Sans clé ni signature ; repli sur la bibliothèque standard si requests est absent"
+      ]
+    },
     tags: ["Python", "JSON-LD", "HTML parsing"],
-    access: "Private repository · code on request"
+    access: { en: "Private repository · code on request", fr: "Dépôt privé · code sur demande" }
+  }
+];
+
+const BACKGROUND = [
+  {
+    title: { en: "SOC analyst", fr: "Analyste SOC" },
+    text: {
+      en: "Triage, detection engineering, threat hunting and incident response support, with Python automation around the SIEM.",
+      fr: "Triage, ingénierie de détection, threat hunting et appui à la réponse à incident, avec de l'automatisation Python autour du SIEM."
+    }
+  },
+  {
+    title: { en: "Independent consultant · remote", fr: "Consultant indépendant · à distance" },
+    text: {
+      en: "Several years of freelance missions across systems administration, cybersecurity and software development.",
+      fr: "Plusieurs années de missions freelance en administration système, cybersécurité et développement."
+    }
+  },
+  {
+    title: { en: "Research, on my own time", fr: "Recherche, sur mon temps libre" },
+    text: {
+      en: "Reverse engineering of client-side protection: obfuscation, anti-tamper and white-box cryptography, on my own devices and lab setups.",
+      fr: "Reverse engineering des protections côté client : obfuscation, anti-tamper et cryptographie white-box, sur mes propres appareils et en lab."
+    }
   }
 ];
 
 const PANELS = {
   security: {
-    head: ["sysmon · WS-114", "sample telemetry"],
+    head: { en: ["sysmon · WS-114", "sample telemetry"], fr: ["sysmon · WS-114", "télémétrie d'exemple"] },
     lines: [
-      ["08:41:02", "EID 1",  "explorer.exe → outlook.exe"],
-      ["08:41:07", "EID 3",  "outlook.exe → 52.97.x.x:443"],
-      ["08:41:19", "4624",   "logon type 2 · j.martin"],
-      ["08:41:33", "EID 11", "chrome.exe wrote invoice_0811.pdf"],
+      ["08:41:02", "EID 1", "explorer.exe → outlook.exe"],
+      ["08:41:07", "EID 3", "outlook.exe → 52.97.x.x:443"],
+      ["08:41:19", "4624", "logon type 2 · j.martin"],
+      ["08:41:33", "EID 11", { en: "chrome.exe wrote invoice_0811.pdf", fr: "chrome.exe a écrit facture_0811.pdf" }],
       ["08:42:05", "EID 10", "rundll32.exe → lsass.exe · 0x1010", "hit"],
-      ["08:42:06", "EID 3",  "rundll32.exe → 185.x.x.x:8443"]
+      ["08:42:06", "EID 3", "rundll32.exe → 185.x.x.x:8443"]
     ],
-    verdict: ["<b>T1003.001</b>", "LSASS memory access", "→ isolate host, scope the session"]
+    verdict: {
+      en: ["<b>T1003.001</b>", "LSASS memory access", "→ isolate host, scope the session"],
+      fr: ["<b>T1003.001</b>", "accès mémoire LSASS", "→ isoler le poste, délimiter la session"]
+    },
+    toggle: ["showRule", "hideRule"],
+    caption: {
+      en: "Sigma rule · Sysmon process access (event 10)",
+      fr: "Règle Sigma · accès processus Sysmon (événement 10)"
+    },
+    code: `<span class="k">title:</span> LSASS access from rundll32
+<span class="k">status:</span> experimental
+<span class="k">description:</span> rundll32 opening lsass with read access, the
+  comsvcs.dll MiniDump credential-dumping pattern
+<span class="k">tags:</span>
+  - attack.credential-access
+  - attack.t1003.001
+<span class="k">logsource:</span>
+  <span class="k">product:</span> windows
+  <span class="k">category:</span> process_access
+<span class="k">detection:</span>
+  <span class="k">selection:</span>
+    <span class="k">TargetImage|endswith:</span> '\\lsass.exe'
+    <span class="k">SourceImage|endswith:</span> '\\rundll32.exe'
+    <span class="k">GrantedAccess|contains:</span>
+      - '0x1010'
+      - '0x1410'
+      - '0x1fffff'
+  <span class="k">condition:</span> selection
+<span class="k">falsepositives:</span>
+  - <span class="c">rare; check the signer of any backup or EDR agent</span>
+<span class="k">level:</span> high`
   },
   engineering: {
-    head: ["deploy · staging", "sample run"],
+    head: { en: ["deploy · staging", "sample run"], fr: ["déploiement · préprod", "exécution d'exemple"] },
     lines: [
       ["$", "", "docker compose up -d --build"],
       ["✔", "postgres", "healthy · 5432"],
       ["✔", "cache", "healthy · 6379"],
       ["✔", "api", "healthy · 8080", "ok"],
       ["✔", "web", "started · 443"],
-      ["$", "", "smoke tests → 42 passed · 429 past quota"]
+      ["$", "", { en: "smoke tests → 42 passed · 429 past quota", fr: "smoke tests → 42 ok · 429 hors quota" }]
     ],
-    verdict: ["<b>green</b>", "migrations applied", "→ ready to ship"],
-    ok: true
+    verdict: {
+      en: ["<b>green</b>", "migrations applied", "→ ready to ship"],
+      fr: ["<b>vert</b>", "migrations appliquées", "→ prêt à livrer"]
+    },
+    ok: true,
+    toggle: ["showHealth", "hideHealth"],
+    caption: {
+      en: "docker-compose.yml · the API waits for a healthy database",
+      fr: "docker-compose.yml · l'API attend une base saine"
+    },
+    code: `<span class="k">api:</span>
+  <span class="k">build:</span> ./backend
+  <span class="k">depends_on:</span>
+    <span class="k">postgres:</span> { <span class="k">condition:</span> service_healthy }
+  <span class="k">healthcheck:</span>
+    <span class="k">test:</span> ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+    <span class="k">interval:</span> 10s
+    <span class="k">retries:</span> 5
+<span class="k">postgres:</span>
+  <span class="k">image:</span> postgres:16
+  <span class="k">healthcheck:</span>
+    <span class="k">test:</span> ["CMD-SHELL", "pg_isready -U app"]
+    <span class="k">interval:</span> 5s`
   }
 };
 
 const CATS = {
-  detection: "Detection & blue team",
-  offensive: "Offense & identity",
-  re: "Reverse engineering",
-  ai: "AI & automation",
-  infra: "Infrastructure",
-  dev: "Dev & everyday tools"
+  detection: { en: "Detection & blue team", fr: "Détection & blue team" },
+  offensive: { en: "Offense & identity", fr: "Offensif & identité" },
+  re: { en: "Reverse engineering", fr: "Reverse engineering" },
+  ai: { en: "AI & automation", fr: "IA & automatisation" },
+  infra: { en: "Infrastructure", fr: "Infrastructure" },
+  dev: { en: "Dev & everyday tools", fr: "Dev & outils du quotidien" }
 };
 const KW = {
   re: ["frida", "jadx", "ida pro", "idassist", "ghidra", "qiling", "capa", "reverse engineering", "reverse-engineering", "apk", "decompil", "deobfusc", "emulation", "tls session keys", "ssl pinning", "magisk"],
   ai: ["llm", "mcp", "gpt", "claude", "chatgpt", "n8n", "ai agent", "ai coding", "agentic", "autonomous", "hermes", "models", "rag ", "sqlcoder", "cursor"],
   detection: ["detection", "sysmon", "splunk", "snort", "intrusion detection", "phish", "purple", "event log", "siem", "ddos protection", "protect from ddos", "bad bot", "modsecurity", "web application firewall", "mitigat", "segmentation", "security issues", "audit"],
   offensive: ["active directory", "kerberos", "ldap", "azure", "entra", "o365", "office365", "office 365", "exchange", "spray", "privilege", "escalation", "exploit", "cve-", "command & control", "post-exploitation", "reverse shell", "payload", "pentest", "penetration", "red team", "nuclei", "recon", "scanner", "enumerat", "bypass", "smb", "hash", "jwt", "lfi", "token", "shodan", "osint", "cloudflare", "dork", "wordlist", "credentials", "aws", "psexec", "socks", "icmp", "netcat", "attack", "search engines", "ctf", "probe", "flyover", "zmap", "network surveys"],
-  infra: ["docker", "monitor", "uptime", "status page", "backup", "proxy manager", "nginx", "redis", "memcached", "linux", "ansible", "php-fpm", "zabbix", "dns", "ngrok", "ingress", " vms", "glances", "bpf", "openresty", "speed test", "asahi", "wayland", "shell!", "copy data", "remote desktop", "self-hosted", "firewall", "traefik"]
+  infra: ["docker", "monitor", "uptime", "status page", "backup", "proxy manager", "nginx", "redis", "memcached", "linux", "ansible", "php-fpm", "zabbix", "dns", "ngrok", "ingress", " vms", "glances", "bpf", "openresty", "speed test", "asahi", "wayland", "copy data", "remote desktop", "self-hosted", "firewall", "traefik"]
 };
 const OVERRIDE = {
   "0xKayala/NucleiFuzzer": "offensive", "devploit/nomore403": "offensive", "yogeshojha/rengine": "offensive",
@@ -586,7 +912,8 @@ const OVERRIDE = {
   "p0dalirius/LDAPmonitor": "offensive", "Genymobile/scrcpy": "dev", "KJTsanaktsidis/tlskeydump": "re",
   "Orange-Cyberdefense/arsenal": "offensive", "owasp-dep-scan/dep-scan": "detection", "dstotijn/hetty": "offensive",
   "swisskyrepo/PayloadsAllTheThings": "offensive", "microsoft/EntraExporter": "infra", "starship/starship": "dev",
-  "omacom/omarchy": "infra", "restic/restic": "infra", "DNSCrypt/dnscrypt-proxy": "infra"
+  "omacom/omarchy": "infra", "restic/restic": "infra", "DNSCrypt/dnscrypt-proxy": "infra",
+  "toniblyx/my-arsenal-of-aws-security-tools": "offensive"
 };
 const HIDE = new Set([
   "hmaverickadams/Windows-WiFi-Extractor", "thewhiteh4t/seeker", "mufeedvh/moonwalk", "FlamingSpork/iptable_evil",
@@ -598,11 +925,29 @@ const HIDE = new Set([
 ]);
 const PER_CAT = 12;
 
-/* ---------- Data ---------- */
+/* ---------- State ---------- */
 let SNAP = {};
 try { SNAP = JSON.parse(document.getElementById("snapshot").textContent || "{}"); } catch (e) { SNAP = {}; }
 let STARS = SNAP.stars || [];
 let LIVE = false;
+let role = "security";
+let lang = "en";
+let activeCat = null;
+let query = "";
+let ruleOpen = false;
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const L = v => (v && typeof v === "object" && !Array.isArray(v) && "en" in v) ? v[lang] : v;
+const T = key => UI[lang][key];
+const fmt = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
+const locale = () => lang === "fr" ? "fr-FR" : "en-GB";
+const fmtDate = iso => {
+  if (!iso) return "—";
+  const d = new Date(iso + "T12:00:00");
+  return isNaN(d) ? iso : d.toLocaleDateString(locale(), { day: "numeric", month: "short", year: "numeric" });
+};
 
 function categorize(s) {
   if (OVERRIDE[s.n]) return OVERRIDE[s.n];
@@ -620,43 +965,58 @@ function buckets() {
 }
 
 /* ---------- Rendering ---------- */
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const fmt = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n);
-let role = "security";
-let activeCat = null;
+function renderStatic() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = T(el.dataset.i18n); });
+  document.querySelectorAll("#role-seg button").forEach(b => { b.textContent = T("roleBtn")[b.dataset.role]; });
+  document.querySelectorAll("#lang-seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
+  $("tool-search").placeholder = T("search")(STARS.filter(s => !HIDE.has(s.n)).length);
+}
 
 function renderPanel() {
-  const p = PANELS[ROLES[role].panel];
+  const key = ROLES[role].panel, p = PANELS[key], head = L(p.head);
+  const [showKey, hideKey] = p.toggle;
   $("panel").innerHTML =
-    `<div class="panel-head"><span>${p.head[0]}</span><span>${p.head[1]}</span></div>` +
+    `<div class="panel-head"><span>${esc(head[0])}</span><span>${esc(head[1])}</span></div>` +
     `<div class="panel-body">` +
-    p.lines.map(l => `<div class="log ${l[3] || ""}"><span class="t">${esc(l[0])}</span><span class="src">${esc(l[1])}</span><span class="msg">${esc(l[2])}</span></div>`).join("") +
-    `</div><figcaption class="verdict ${p.ok ? "ok" : ""}">${p.verdict.map(v => `<span>${v}</span>`).join("")}</figcaption>`;
+    p.lines.map(l => `<div class="log ${l[3] || ""}"><span class="t">${esc(l[0])}</span><span class="src">${esc(l[1])}</span><span class="msg">${esc(L(l[2]))}</span></div>`).join("") +
+    `</div><figcaption class="verdict ${p.ok ? "ok" : ""}">${L(p.verdict).map(v => `<span>${v}</span>`).join("")}` +
+    `<button type="button" class="rule-toggle" id="rule-toggle" aria-expanded="${ruleOpen}" aria-controls="rule">${esc(T(ruleOpen ? hideKey : showKey))}</button></figcaption>` +
+    `<div class="rule" id="rule" ${ruleOpen ? "" : "hidden"}><p class="rule-cap">${esc(L(p.caption))}</p><pre>${p.code}</pre></div>`;
+  $("panel").classList.toggle("eng", key === "engineering");
+  $("panel").setAttribute("aria-label", head[1]);
+  $("panel-note").textContent = T("panelNote")[key];
 }
 
 function renderStrengths(b) {
   $("strength-list").innerHTML = ROLES[role].order.map((k, i) => {
     const s = STRENGTHS[k], n = b[k].length;
     return `<article class="strength ${i === 0 ? "lead" : ""}">
-      <div class="top"><h3>${esc(s.title)}</h3><span class="rank">${i === 0 ? "primary" : "#" + (i + 1)}</span></div>
-      <ul>${s.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
-      <p class="evidence">${esc(s.stack)}<br><a href="#toolbox" data-cat="${k}">${n} tool${n === 1 ? "" : "s"} followed in this area</a></p>
+      <div class="top"><h3>${esc(L(s.title))}</h3><span class="rank ${i === 0 ? "lead-tag" : ""}">${i === 0 ? esc(T("primary")) : "#" + (i + 1)}</span></div>
+      <ul>${L(s.points).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+      <p class="evidence">${esc(L(s.stack))}<br><a href="#toolbox" data-cat="${k}">${esc(T("toolsIn")(n))}</a></p>
     </article>`;
   }).join("");
 }
 
 function renderProjects() {
   const list = [...PROJECTS].sort((a, b) => a.roles[role] - b.roles[role]);
-  $("project-list").innerHTML = list.map(p => `<article class="project">
-    <div class="kind"><p class="eyebrow">${esc(p.kind)}</p></div>
-    <h3>${esc(p.title)}</h3>
-    ${p.figure ? `<p class="figure">${esc(p.figure[0])}<small>${esc(p.figure[1])}</small></p>` : ""}
-    <p>${esc(p.text)}</p>
-    <ul>${p.bullets.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-    <div class="chips">${p.tags.map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div>
-    <p class="access">${esc(p.access)}</p>
-  </article>`).join("");
+  $("project-list").innerHTML = list.map(p => {
+    const fig = L(p.figure);
+    return `<article class="project">
+      <div class="p-main">
+        <p class="eyebrow">${esc(L(p.kind))}</p>
+        <h3>${esc(L(p.title))}</h3>
+        ${fig ? `<p class="figure">${esc(fig[0])}<small>${esc(fig[1])}</small></p>` : ""}
+        <p>${esc(L(p.text))}</p>
+      </div>
+      <div class="p-side">
+        <ul>${L(p.bullets).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <div class="chips">${p.tags.map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div>
+        <p class="access">${esc(L(p.access))}</p>
+      </div>
+    </article>`;
+  }).join("");
 }
 
 function renderActivity() {
@@ -666,105 +1026,139 @@ function renderActivity() {
   start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // back to Monday
   const cells = []; let total = 0, active = 0;
   for (let d = new Date(start); d <= today || (d.getDay() + 6) % 7 !== 0; d.setDate(d.getDate() + 1)) {
-    const key = d.toISOString().slice(0, 10);
-    // local date key
-    const lk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     if (d > today) { cells.push(`<i class="future"></i>`); continue; }
-    const c = days[lk] || 0; total += c; if (c) active++;
+    const c = days[key] || 0; total += c; if (c) active++;
     const l = c === 0 ? 0 : c <= 2 ? 1 : c <= 5 ? 2 : c <= 9 ? 3 : 4;
-    cells.push(`<i data-l="${l}" title="${lk}: ${c} commit${c === 1 ? "" : "s"}"></i>`);
+    cells.push(`<i data-l="${l}" title="${esc(T("commitsOn")(fmtDate(key), c))}"></i>`);
   }
   $("heat").innerHTML = cells.join("");
-  const mon = { month: "short", day: "numeric" };
-  $("heat-range").textContent = `${start.toLocaleDateString("en-GB", mon)} – ${today.toLocaleDateString("en-GB", mon)}`;
+  const opt = { month: "short", day: "numeric" };
+  $("heat-range").textContent = `${start.toLocaleDateString(locale(), opt)} – ${today.toLocaleDateString(locale(), opt)}`;
   $("stats").innerHTML = [
-    [total, "commits · 26 weeks"],
-    [active, "active days"],
-    [SNAP.repos_total || 0, `repositories (${SNAP.repos_private || 0} private)`]
-  ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+    [total, T("statCommits")],
+    [active, T("statDays")],
+    [SNAP.repos_total || 0, T("statRepos")(SNAP.repos_private || 0)]
+  ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${esc(l)}</span></div>`).join("");
 
   const langs = SNAP.languages || [], max = SNAP.repos_total || 1;
-  $("langs").innerHTML = langs.slice(0, 8).map(([name, n]) => `<div class="lang">
+  $("langs").innerHTML = langs.slice(0, 8).map(([name, n]) => `<div class="lang-row">
     <span>${esc(name)}</span><span class="track"><span class="fill" style="width:${(n / max * 100).toFixed(1)}%"></span></span>
     <span class="n">${n}/${max}</span></div>`).join("") +
-    `<p class="access" style="margin-top:6px">Number of repositories that use each language.</p>`;
+    `<p class="access" style="margin-top:6px">${esc(T("langNote"))}</p>`;
 }
 
 function renderToolbox(b) {
   const order = ROLES[role].order;
   if (!activeCat || !order.includes(activeCat)) activeCat = order[0];
-  $("tabs").innerHTML = order.map(k => `<button type="button" data-cat="${k}" aria-pressed="${k === activeCat}">${CATS[k]}<span>${b[k].length}</span></button>`).join("");
-  const shown = b[activeCat].filter(s => !HIDE.has(s.n)).slice(0, PER_CAT);
-  $("tools").innerHTML = shown.map(s => `<a class="tool" href="https://github.com/${esc(s.n)}" target="_blank" rel="noopener">
+  const searching = query.trim().length > 0;
+  $("tabs").classList.toggle("dim", searching);
+  $("tabs").innerHTML = order.map(k => `<button type="button" data-cat="${k}" aria-pressed="${!searching && k === activeCat}">${esc(L(CATS[k]))}<span>${b[k].length}</span></button>`).join("");
+  let shown;
+  if (searching) {
+    const q = query.trim().toLowerCase();
+    shown = STARS.filter(s => !HIDE.has(s.n) && (s.n + " " + s.d + " " + s.l).toLowerCase().includes(q))
+      .sort((x, y) => y.s - x.s).slice(0, 24);
+  } else {
+    shown = b[activeCat].filter(s => !HIDE.has(s.n)).slice(0, PER_CAT);
+  }
+  $("tools").innerHTML = shown.length ? shown.map(s => `<a class="tool" href="https://github.com/${esc(s.n)}" target="_blank" rel="noopener">
       <span class="nm">${esc(s.n.split("/")[1])}</span>
       <span class="ds">${esc(s.d || s.n)}</span>
       <span class="st">★ ${fmt(s.s)}${s.l ? " · " + esc(s.l) : ""} · ${esc(s.n.split("/")[0])}</span>
-    </a>`).join("");
-  $("all-stars").textContent = `See all ${STARS.length} starred repositories on GitHub`;
+    </a>`).join("") : `<p class="empty">${esc(T("noMatch")(query.trim()))}</p>`;
+  $("all-stars").textContent = T("allStars")(STARS.length);
   const sync = $("sync");
   sync.classList.toggle("live", LIVE);
-  sync.textContent = LIVE ? "Live from GitHub" : `Snapshot from ${SNAP.generated || "GitHub"}`;
+  sync.textContent = LIVE ? T("live") : T("snapshot")(fmtDate(SNAP.generated));
 }
 
 function renderBackground() {
-  const rows = [
-    ["SOC analyst", "Triage, detection engineering, threat hunting and incident response support, with Python automation around the SIEM."],
-    ["Independent consultant · remote", "Several years of freelance missions across systems administration, cybersecurity and software development."],
-    ["Research, on my own time", "Reverse engineering of client-side protection: obfuscation, anti-tamper and white-box cryptography, on my own devices and lab setups."]
-  ];
-  const missions = CONFIG.missions.map(m => [`${m.title}${m.period ? " · " + m.period : ""}`, `${m.client ? m.client + ". " : ""}${m.text}`]);
-  $("rows").innerHTML = [...rows.slice(0, 2), ...missions, rows[2]].map(([h, p]) => `<div class="row"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join("");
+  const missions = CONFIG.missions.map(m => ({
+    title: L(m.title) + (m.period ? " · " + m.period : ""),
+    text: (m.client ? L(m.client) + ". " : "") + L(m.text)
+  }));
+  const rows = [BACKGROUND[0], BACKGROUND[1], ...missions, BACKGROUND[2]];
+  $("rows").innerHTML = rows.map(r => `<div class="row"><h3>${esc(L(r.title))}</h3><p>${esc(L(r.text))}</p></div>`).join("");
 }
 
 function renderContact() {
   const items = [];
-  if (CONFIG.email) items.push(`<span class="btn mono" id="email-text">${esc(CONFIG.email)}</span><button type="button" class="btn" id="copy-email">Copy email</button>`);
+  if (CONFIG.email) items.push(`<span class="btn mono" id="email-text">${esc(CONFIG.email)}</span><button type="button" class="btn" id="copy-email">${esc(T("copyEmail"))}</button>`);
   if (CONFIG.linkedin) items.push(`<a class="btn primary" href="${esc(CONFIG.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`);
   items.push(`<a class="btn ${CONFIG.linkedin ? "" : "primary"}" href="https://github.com/${esc(CONFIG.handle)}" target="_blank" rel="noopener">github.com/${esc(CONFIG.handle)}</a>`);
-  if (CONFIG.location) items.push(`<span class="access">${esc(CONFIG.location)}</span>`);
+  if (L(CONFIG.location)) items.push(`<span class="access">${esc(L(CONFIG.location))}</span>`);
   $("contact-links").innerHTML = items.join("");
   const copy = $("copy-email");
   if (copy) copy.addEventListener("click", () => {
-    navigator.clipboard.writeText(CONFIG.email).then(() => { copy.textContent = "Copied"; })
+    navigator.clipboard.writeText(CONFIG.email).then(() => { copy.textContent = T("copied"); })
       .catch(() => { const r = document.createRange(); r.selectNodeContents($("email-text")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); });
   });
+  $("targets").innerHTML = L(ROLES[role].targets).map((t, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${esc(t)}</li>`).join("");
+}
+
+function renderFooter() {
+  $("foot-sync").textContent = T("foot")(LIVE, fmtDate(SNAP.generated), STARS.length, fmtDate(SNAP.last_push));
 }
 
 function render() {
   const r = ROLES[role];
-  document.querySelectorAll(".seg button").forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.role === role));
-  $("role-title").textContent = r.title;
-  $("lede").textContent = r.lede;
+  document.querySelectorAll("#role-seg button").forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.role === role));
   $("who").textContent = CONFIG.name || CONFIG.handle;
+  $("role-title").textContent = L(r.title);
+  $("lede").textContent = L(r.lede);
   const b = buckets();
-  renderPanel(); renderStrengths(b); renderProjects(); renderToolbox(b);
-  $("foot-sync").textContent = `GitHub data ${LIVE ? "live" : "as of " + (SNAP.generated || "—")} · ${STARS.length} starred · last push ${SNAP.last_push || "—"}`;
+  renderStatic(); renderPanel(); renderStrengths(b); renderProjects(); renderActivity();
+  renderToolbox(b); renderBackground(); renderContact(); renderFooter();
 }
 
-function setRole(next, push) {
-  if (!ROLES[next]) next = "security";
-  if (next !== role) activeCat = null;
-  role = next;
-  if (push && location.hash !== "#" + next) history.replaceState(null, "", "#" + next);
-  try { localStorage.setItem("role", next); } catch (e) {}
-  render();
+/* ---------- Routing: #security, #fr-security, ... ---------- */
+function writeHash() {
+  const h = (lang === "fr" ? "fr-" : "") + role;
+  if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h);
+}
+function readHash() {
+  const m = /^(fr-)?(security|engineering|everything)$/.exec(location.hash.slice(1));
+  return m ? { lang: m[1] ? "fr" : "en", role: m[2] } : null;
+}
+function save() {
+  try { localStorage.setItem("role", role); localStorage.setItem("lang", lang); } catch (e) {}
 }
 
-document.querySelector(".seg").addEventListener("click", e => {
+$("role-seg").addEventListener("click", e => {
   const btn = e.target.closest("button[data-role]");
-  if (btn) setRole(btn.dataset.role, true);
+  if (!btn || btn.dataset.role === role) return;
+  role = btn.dataset.role; activeCat = null; ruleOpen = false;
+  writeHash(); save(); render();
+});
+$("lang-seg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-lang]");
+  if (!btn || btn.dataset.lang === lang) return;
+  lang = btn.dataset.lang;
+  writeHash(); save(); render();
+});
+$("panel").addEventListener("click", e => {
+  if (!e.target.closest("#rule-toggle")) return;
+  ruleOpen = !ruleOpen; renderPanel();
+  $("rule-toggle").focus();
 });
 $("tabs").addEventListener("click", e => {
   const btn = e.target.closest("button[data-cat]");
-  if (btn) { activeCat = btn.dataset.cat; renderToolbox(buckets()); }
+  if (!btn) return;
+  activeCat = btn.dataset.cat; query = ""; $("tool-search").value = "";
+  renderToolbox(buckets());
 });
 $("strength-list").addEventListener("click", e => {
   const a = e.target.closest("a[data-cat]");
-  if (a) { activeCat = a.dataset.cat; renderToolbox(buckets()); }
+  if (a) { activeCat = a.dataset.cat; query = ""; $("tool-search").value = ""; renderToolbox(buckets()); }
 });
+$("tool-search").addEventListener("input", e => { query = e.target.value; renderToolbox(buckets()); });
 window.addEventListener("hashchange", () => {
-  const h = location.hash.slice(1);
-  if (ROLES[h]) setRole(h, false);
+  const h = readHash();
+  if (h && (h.role !== role || h.lang !== lang)) {
+    if (h.role !== role) { activeCat = null; ruleOpen = false; }
+    role = h.role; lang = h.lang; save(); render();
+  }
 });
 
 /* Live refresh from the public GitHub API when the host allows it (e.g. GitHub Pages). */
@@ -778,16 +1172,18 @@ async function goLive() {
       all.push(...batch.map(r => ({ n: r.full_name, d: r.description || "", l: r.language || "", s: r.stargazers_count })));
       if (batch.length < 100) break;
     }
-    if (all.length) { STARS = all; LIVE = true; render(); }
+    if (all.length) { STARS = all; LIVE = true; const b = buckets(); renderStatic(); renderStrengths(b); renderToolbox(b); renderFooter(); }
   } catch (e) { /* blocked or offline: keep the snapshot */ }
 }
 
 (function init() {
-  const h = location.hash.slice(1);
-  let start = ROLES[h] ? h : null;
-  if (!start) { try { start = localStorage.getItem("role"); } catch (e) {} }
-  role = ROLES[start] ? start : "security";
-  renderActivity(); renderBackground(); renderContact(); render();
+  const h = readHash();
+  let savedRole = null, savedLang = null;
+  try { savedRole = localStorage.getItem("role"); savedLang = localStorage.getItem("lang"); } catch (e) {}
+  const navFr = (navigator.languages || [navigator.language || ""]).some(l => /^fr\b/i.test(l));
+  role = h ? h.role : (ROLES[savedRole] ? savedRole : "security");
+  lang = h ? h.lang : (savedLang === "fr" || savedLang === "en" ? savedLang : (navFr ? "fr" : "en"));
+  render();
   goLive();
 })();
 </script>
